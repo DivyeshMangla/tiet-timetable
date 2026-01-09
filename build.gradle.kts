@@ -18,4 +18,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.yaml/snakeyaml
     implementation("org.yaml:snakeyaml:2.5")
+
+    // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
+    implementation("ch.qos.logback:logback-classic:1.5.24")
 }

@@ -4,6 +4,8 @@ import io.github.divyeshmangla.timetable.config.Config;
 import io.github.divyeshmangla.timetable.config.ConfigLoader;
 import io.github.divyeshmangla.timetable.config.WorkbookLoader;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,9 +21,9 @@ import java.util.Arrays;
  * (local file preferred, fallback to bundled), downloads the timetable Excel
  * file, and proceeds with parsing.
  */
-
 public class Timetable {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Timetable.class);
     private static final String CONFIG_FILE = "config.yml";
 
     public static void main(String[] args) throws Exception {
@@ -32,6 +34,7 @@ public class Timetable {
         try (InputStream cfg = resolveConfig()) {
             Config config = ConfigLoader.load(cfg);
             Workbook workbook = WorkbookLoader.load(config);
+            LOGGER.info("Timetable loaded successfully");
         }
     }
 
@@ -42,13 +45,13 @@ public class Timetable {
 
         Path localConfig = Path.of(CONFIG_FILE);
         if (Files.exists(localConfig)) {
-            System.out.println("config.yml already exists");
+            LOGGER.info("config.yml already exists");
             return true;
         }
 
         try (InputStream in = getBundledConfig()) {
             Files.copy(in, localConfig);
-            System.out.println("config.yml created");
+            LOGGER.info("config.yml created successfully");
         }
 
         return true;
@@ -58,9 +61,11 @@ public class Timetable {
         Path localConfig = Path.of(CONFIG_FILE);
 
         if (Files.exists(localConfig)) {
+            LOGGER.debug("Using local config.yml");
             return Files.newInputStream(localConfig);
         }
 
+        LOGGER.debug("Using bundled config.yml");
         return getBundledConfig();
     }
 
@@ -70,6 +75,7 @@ public class Timetable {
                 .getResourceAsStream(CONFIG_FILE);
 
         if (in == null) {
+            LOGGER.error("Bundled config.yml not found in classpath");
             throw new IllegalStateException("Bundled config.yml not found");
         }
 
