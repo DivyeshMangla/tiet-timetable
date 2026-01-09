@@ -8,6 +8,7 @@ This project focuses on reading the official TIET timetable Excel file and conve
 ## Tech Stack
 - Java
 - Apache POI
+- SnakeYAML
 - Gradle
 
 ## Status

@@ -1,0 +1,7 @@
+timetable:
+  url: https://www.thapar.edu/upload/files/UG,%20PG%20TIME%20TABLE%20JAN%20TO%20MAY%202026.xlsx
+
+subjects:
+  UES013:
+    name: Electrical and Electronics Engineering
+    abbreviation: EEE
