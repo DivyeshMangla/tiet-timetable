@@ -1,14 +1,11 @@
 package io.github.divyeshmangla.timetable.config;
 
+import io.github.divyeshmangla.timetable.utils.HttpUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 
 public final class WorkbookLoader {
 
@@ -19,12 +16,11 @@ public final class WorkbookLoader {
     }
 
     public static Workbook loadFromUrl(String url) throws IOException {
-        Path tempFile = Files.createTempFile("timetable-", ".xlsx");
-
-        try (InputStream in = URI.create(url).toURL().openStream()) {
-            Files.copy(in, tempFile, StandardCopyOption.REPLACE_EXISTING);
+        try (InputStream in = HttpUtils.download(url)) {
+            return WorkbookFactory.create(in);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Download interrupted", e);
         }
-
-        return WorkbookFactory.create(Files.newInputStream(tempFile));
     }
 }

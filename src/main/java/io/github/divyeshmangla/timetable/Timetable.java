@@ -32,8 +32,6 @@ public class Timetable {
         try (InputStream cfg = resolveConfig()) {
             Config config = ConfigLoader.load(cfg);
             Workbook workbook = WorkbookLoader.load(config);
-            System.out.println("Workook loaded successfully" + workbook.getSheetName(1) + " sheets");
-            // TODO: parse workbook
         }
     }
 
