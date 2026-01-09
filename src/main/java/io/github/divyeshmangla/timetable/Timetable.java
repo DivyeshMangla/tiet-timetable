@@ -3,6 +3,7 @@ package io.github.divyeshmangla.timetable;
 import io.github.divyeshmangla.timetable.config.Config;
 import io.github.divyeshmangla.timetable.config.ConfigLoader;
 import io.github.divyeshmangla.timetable.config.WorkbookLoader;
+import io.github.divyeshmangla.timetable.parser.Parser;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,8 @@ public class Timetable {
         try (InputStream cfg = resolveConfig()) {
             Config config = ConfigLoader.load(cfg);
             Workbook workbook = WorkbookLoader.load(config);
+            new Parser(workbook, config);
+
             LOGGER.info("Timetable loaded successfully");
         }
     }
