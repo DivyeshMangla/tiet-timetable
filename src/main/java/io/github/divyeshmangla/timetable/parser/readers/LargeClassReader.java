@@ -1,4 +1,4 @@
-package io.github.divyeshmangla.timetable.parser;
+package io.github.divyeshmangla.timetable.parser.readers;
 
 import io.github.divyeshmangla.timetable.utils.ExcelUtils;
 import org.apache.poi.ss.usermodel.Cell;
