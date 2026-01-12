@@ -1,45 +1,62 @@
 package io.github.divyeshmangla.timetable.parser.readers;
 
-import io.github.divyeshmangla.timetable.utils.ExcelUtils;
+import io.github.divyeshmangla.timetable.excel.CellUtils;
+import io.github.divyeshmangla.timetable.model.ClassInfo;
+import io.github.divyeshmangla.timetable.parser.ClassReader;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class LargeClassReader {
+/**
+ * Reads large (horizontally merged) class layout.
+ */
+public class LargeClassReader implements ClassReader {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LargeClassReader.class);
 
-    private LargeClassReader() {}
-
-    public static boolean isLargeClass(Cell cell) {
+    @Override
+    public boolean matches(Cell cell) {
         return cell != null && getHorizontalMergedRegion(cell.getSheet(), cell.getRowIndex(), cell.getColumnIndex()) != null;
     }
 
-    public static void read(Cell anyCellInMerge) {
-        if (!isLargeClass(anyCellInMerge)) return;
+    @Override
+    public ClassInfo read(Cell anyCellInMerge) {
+        if (!matches(anyCellInMerge)) return null;
 
         Sheet sheet = anyCellInMerge.getSheet();
         int row = anyCellInMerge.getRowIndex();
         int col = anyCellInMerge.getColumnIndex();
 
         CellRangeAddress range = getHorizontalMergedRegion(sheet, row, col);
-        if (range == null) return;
+        if (range == null) return null;
 
         int startCol = range.getFirstColumn();
-        int endCol   = range.getLastColumn();
+        int endCol = range.getLastColumn();
 
         Row subjectRow = sheet.getRow(row);
         Cell classCodeCell = subjectRow != null ? subjectRow.getCell(startCol) : null;
+        Cell roomCell = CellUtils.getCell(sheet, row + 1, startCol);
+        Cell teacherCell = CellUtils.getCell(sheet, row + 1, endCol);
 
-        Cell locationCell =ExcelUtils.getCell(sheet, row + 1, startCol);
-        Cell teacherCell = ExcelUtils.getCell(sheet, row + 1, endCol);
-
-        if (classCodeCell == null || locationCell == null || teacherCell == null) {
-            return;
+        if (classCodeCell == null || roomCell == null || teacherCell == null) {
+            return null;
         }
 
-        System.out.println(classCodeCell.toString().trim());
-        System.out.println(locationCell.toString().trim());
-        System.out.println(teacherCell.toString().trim());
+        return new ClassInfo(
+                classCodeCell.toString().trim(),
+                roomCell.toString().trim(),
+                teacherCell.toString().trim()
+        );
+    }
+
+    @Override
+    public void log(Cell anyCellInMerge) {
+        ClassInfo info = read(anyCellInMerge);
+        if (info != null) {
+            LOGGER.info("Large class: {} | {} | {}", info.subjectCode(), info.room(), info.teacher());
+        }
     }
 
     private static CellRangeAddress getHorizontalMergedRegion(Sheet sheet, int row, int col) {

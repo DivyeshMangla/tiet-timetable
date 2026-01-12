@@ -1,4 +1,4 @@
-package io.github.divyeshmangla.timetable.types;
+package io.github.divyeshmangla.timetable.model;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;

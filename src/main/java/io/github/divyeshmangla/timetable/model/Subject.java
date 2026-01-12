@@ -1,4 +1,4 @@
-package io.github.divyeshmangla.timetable.types;
+package io.github.divyeshmangla.timetable.model;
 
 /**
  * If no abbr is provided in the config, subject name is used as the abbreviation.

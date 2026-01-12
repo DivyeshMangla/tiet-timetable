@@ -2,17 +2,15 @@ package io.github.divyeshmangla.timetable;
 
 import io.github.divyeshmangla.timetable.config.Config;
 import io.github.divyeshmangla.timetable.config.ConfigLoader;
-import io.github.divyeshmangla.timetable.config.WorkbookLoader;
+import io.github.divyeshmangla.timetable.io.HttpUtils;
 import io.github.divyeshmangla.timetable.parser.Parser;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
 
 /**
  * Main entry point for the Timetable application.
@@ -23,65 +21,31 @@ import java.util.Arrays;
  * file, and proceeds with parsing.
  */
 public class Timetable {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Timetable.class);
     private static final String CONFIG_FILE = "config.yml";
 
     public static void main(String[] args) throws Exception {
-        if (handleInitConfig(args)) {
+        ConfigLoader loader = new ConfigLoader(CONFIG_FILE);
+
+        if (loader.handleInitFlag(args)) {
             return;
         }
 
-        try (InputStream cfg = resolveConfig()) {
-            Config config = ConfigLoader.load(cfg);
-            Workbook workbook = WorkbookLoader.load(config);
+        try (InputStream cfg = loader.resolve()) {
+            Config config = ConfigLoader.parse(cfg);
+            Workbook workbook = loadFromUrl(config.timetableUrl());
             new Parser(workbook, config);
 
             LOGGER.info("Timetable loaded successfully");
         }
     }
 
-    private static boolean handleInitConfig(String[] args) throws IOException {
-        if (!Arrays.asList(args).contains("--init-config")) {
-            return false;
+    private static Workbook loadFromUrl(String url) throws IOException {
+        try (InputStream in = HttpUtils.download(url)) {
+            return WorkbookFactory.create(in);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Download interrupted", e);
         }
-
-        Path localConfig = Path.of(CONFIG_FILE);
-        if (Files.exists(localConfig)) {
-            LOGGER.info("config.yml already exists");
-            return true;
-        }
-
-        try (InputStream in = getBundledConfig()) {
-            Files.copy(in, localConfig);
-            LOGGER.info("config.yml created successfully");
-        }
-
-        return true;
-    }
-
-    private static InputStream resolveConfig() throws IOException {
-        Path localConfig = Path.of(CONFIG_FILE);
-
-        if (Files.exists(localConfig)) {
-            LOGGER.debug("Using local config.yml");
-            return Files.newInputStream(localConfig);
-        }
-
-        LOGGER.debug("Using bundled config.yml");
-        return getBundledConfig();
-    }
-
-    private static InputStream getBundledConfig() {
-        InputStream in = Timetable.class
-                .getClassLoader()
-                .getResourceAsStream(CONFIG_FILE);
-
-        if (in == null) {
-            LOGGER.error("Bundled config.yml not found in classpath");
-            throw new IllegalStateException("Bundled config.yml not found");
-        }
-
-        return in;
     }
 }

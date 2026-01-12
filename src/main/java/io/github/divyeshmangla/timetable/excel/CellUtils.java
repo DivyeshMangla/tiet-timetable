@@ -1,11 +1,11 @@
-package io.github.divyeshmangla.timetable.utils;
+package io.github.divyeshmangla.timetable.excel;
 
 import org.apache.poi.ss.usermodel.*;
 
-public class ExcelUtils {
+public final class CellUtils {
     private static final DataFormatter FORMATTER = new DataFormatter();
 
-    private ExcelUtils() {}
+    private CellUtils() {}
 
     public static Cell getCell(Sheet sheet, int row, int col) {
         Row r = sheet.getRow(row);
@@ -17,7 +17,7 @@ public class ExcelUtils {
     }
 
     public static Integer parseSlotNumber(Cell cell) {
-        String cellValue = ExcelUtils.getCellString(cell);
+        String cellValue = getCellString(cell);
 
         if (cellValue.isBlank()) return null;
 

@@ -1,9 +1,9 @@
 package io.github.divyeshmangla.timetable.parser;
 
 import io.github.divyeshmangla.timetable.config.Config;
-import io.github.divyeshmangla.timetable.types.Day;
-import io.github.divyeshmangla.timetable.types.TimeSlot;
-import io.github.divyeshmangla.timetable.utils.ExcelUtils;
+import io.github.divyeshmangla.timetable.model.Day;
+import io.github.divyeshmangla.timetable.model.TimeSlot;
+import io.github.divyeshmangla.timetable.excel.CellUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -48,7 +48,7 @@ public class Parser {
 
     private Cell findCellInFirstColumn(Sheet sheet, String searchText) {
         for (int row = 0; row <= sheet.getLastRowNum(); row++) {
-            Cell cell = ExcelUtils.getCell(sheet, row, 0);
+            Cell cell = CellUtils.getCell(sheet, row, 0);
             if (cell != null && searchText.equalsIgnoreCase(cell.toString().trim())) {
                 return cell;
             }
@@ -114,12 +114,12 @@ public class Parser {
         Map<TimeSlot, Cell> currentDaySlots = new EnumMap<>(TimeSlot.class);
 
         for (int row = startRow; row <= sheet.getLastRowNum() && currentDayIndex < days.length; row++) {
-            Cell cell = ExcelUtils.getCell(sheet, row, column);
+            Cell cell = CellUtils.getCell(sheet, row, column);
             if (cell == null) {
                 continue;
             }
 
-            Integer slotNumber = ExcelUtils.parseSlotNumber(cell);
+            Integer slotNumber = CellUtils.parseSlotNumber(cell);
             if (slotNumber == null) {
                 continue;
             }

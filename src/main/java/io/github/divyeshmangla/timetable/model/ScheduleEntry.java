@@ -1,4 +1,4 @@
-package io.github.divyeshmangla.timetable.types;
+package io.github.divyeshmangla.timetable.model;
 
 public record ScheduleEntry(
         Subject subject,
