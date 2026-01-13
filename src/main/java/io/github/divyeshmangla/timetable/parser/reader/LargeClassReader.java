@@ -1,24 +1,27 @@
-package io.github.divyeshmangla.timetable.parser.readers;
+package io.github.divyeshmangla.timetable.parser.reader;
 
 import io.github.divyeshmangla.timetable.excel.CellUtils;
 import io.github.divyeshmangla.timetable.model.ClassInfo;
-import io.github.divyeshmangla.timetable.parser.ClassReader;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Reads large (horizontally merged) class layout.
  */
 public class LargeClassReader implements ClassReader {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LargeClassReader.class);
 
     @Override
     public boolean matches(Cell cell) {
-        return cell != null && getHorizontalMergedRegion(cell.getSheet(), cell.getRowIndex(), cell.getColumnIndex()) != null;
+        if (cell == null) return false;
+        
+        CellRangeAddress range = getHorizontalMergedRegion(cell.getSheet(), cell.getRowIndex(), cell.getColumnIndex());
+        if (range == null) return false;
+
+        // Verify first cell in merge is a subject code
+        Cell firstCell = CellUtils.getCell(cell.getSheet(), range.getFirstRow(), range.getFirstColumn());
+        return CellUtils.isSubjectCode(firstCell);
     }
 
     @Override
@@ -49,14 +52,6 @@ public class LargeClassReader implements ClassReader {
                 roomCell.toString().trim(),
                 teacherCell.toString().trim()
         );
-    }
-
-    @Override
-    public void log(Cell anyCellInMerge) {
-        ClassInfo info = read(anyCellInMerge);
-        if (info != null) {
-            LOGGER.info("Large class: {} | {} | {}", info.subjectCode(), info.room(), info.teacher());
-        }
     }
 
     private static CellRangeAddress getHorizontalMergedRegion(Sheet sheet, int row, int col) {

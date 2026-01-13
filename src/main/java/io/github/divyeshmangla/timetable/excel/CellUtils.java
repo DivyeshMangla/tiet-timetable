@@ -2,8 +2,11 @@ package io.github.divyeshmangla.timetable.excel;
 
 import org.apache.poi.ss.usermodel.*;
 
+import java.util.regex.Pattern;
+
 public final class CellUtils {
     private static final DataFormatter FORMATTER = new DataFormatter();
+    private static final Pattern SUBJECT_CODE_PATTERN = Pattern.compile("[A-Z]{3}\\d{3}");
 
     private CellUtils() {}
 
@@ -26,5 +29,13 @@ public final class CellUtils {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    /**
+     * Checks if the cell contains a valid subject code (e.g., UES103, UPH102).
+     */
+    public static boolean isSubjectCode(Cell cell) {
+        String value = getCellString(cell);
+        return SUBJECT_CODE_PATTERN.matcher(value).matches();
     }
 }
