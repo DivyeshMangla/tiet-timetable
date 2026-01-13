@@ -31,6 +31,16 @@ public final class CellUtils {
         }
     }
 
+    public static Cell findCellInFirstColumn(Sheet sheet, String searchText) {
+        for (int row = 0; row <= sheet.getLastRowNum(); row++) {
+            Cell cell = CellUtils.getCell(sheet, row, 0);
+            if (cell != null && searchText.equalsIgnoreCase(cell.toString().trim())) {
+                return cell;
+            }
+        }
+        return null;
+    }
+
     /**
      * Checks if the cell contains a valid subject code (e.g., UES103, UPH102).
      */

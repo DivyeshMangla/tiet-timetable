@@ -38,12 +38,10 @@ public class Parser {
         return workbook.isSheetHidden(index) || workbook.isSheetVeryHidden(index);
     }
 
-    public static List<DayCellCache> buildDayCellCache(Sheet sheet, Cell firstSlotCell) {
+    public List<DayCellCache> buildDayCellCache(Sheet sheet, Cell firstSlotCell) {
         List<DayCellCache> result = new ArrayList<>();
 
-        if (sheet == null || firstSlotCell == null) {
-            return result;
-        }
+        if (sheet == null || firstSlotCell == null) return result;
 
         int column = firstSlotCell.getColumnIndex();
         int startRow = firstSlotCell.getRowIndex();
@@ -54,14 +52,12 @@ public class Parser {
 
         for (int row = startRow; row <= sheet.getLastRowNum() && currentDayIndex < days.length; row++) {
             Cell cell = CellUtils.getCell(sheet, row, column);
-            if (cell == null) {
-                continue;
-            }
+            if (cell == null) continue;
+
 
             Integer slotNumber = CellUtils.parseSlotNumber(cell);
-            if (slotNumber == null) {
-                continue;
-            }
+            if (slotNumber == null) continue;
+
 
             // Detect new day when slot resets to 1
             if (slotNumber == 1 && !currentDaySlots.isEmpty()) {
@@ -69,9 +65,7 @@ public class Parser {
                 currentDayIndex++;
                 currentDaySlots = new EnumMap<>(TimeSlot.class);
 
-                if (currentDayIndex >= days.length) {
-                    break;
-                }
+                if (currentDayIndex >= days.length) break;
             }
 
             TimeSlot slot = TimeSlot.fromNumber(slotNumber);
