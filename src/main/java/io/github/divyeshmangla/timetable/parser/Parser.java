@@ -1,11 +1,10 @@
 package io.github.divyeshmangla.timetable.parser;
 
 import io.github.divyeshmangla.timetable.config.Config;
+import io.github.divyeshmangla.timetable.excel.CellUtils;
 import io.github.divyeshmangla.timetable.model.Day;
 import io.github.divyeshmangla.timetable.model.TimeSlot;
-import io.github.divyeshmangla.timetable.excel.CellUtils;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -15,9 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 public class Parser {
-    private static final String DAY_HEADER = "day";
-    private static final String HOURS_HEADER = "hours";
-
     private final Workbook workbook;
     private final Config config;
 
@@ -40,63 +36,6 @@ public class Parser {
 
     private boolean isSheetHidden(int index) {
         return workbook.isSheetHidden(index) || workbook.isSheetVeryHidden(index);
-    }
-
-    public Cell findDayCell(Sheet sheet) {
-        return findCellInFirstColumn(sheet, DAY_HEADER);
-    }
-
-    private Cell findCellInFirstColumn(Sheet sheet, String searchText) {
-        for (int row = 0; row <= sheet.getLastRowNum(); row++) {
-            Cell cell = CellUtils.getCell(sheet, row, 0);
-            if (cell != null && searchText.equalsIgnoreCase(cell.toString().trim())) {
-                return cell;
-            }
-        }
-        return null;
-    }
-
-    public Cell findHoursCell(Sheet sheet, Cell dayCell) {
-        if (dayCell == null) {
-            return null;
-        }
-
-        Row row = sheet.getRow(dayCell.getRowIndex());
-        if (row == null) {
-            return null;
-        }
-
-        return findCellInRow(row, HOURS_HEADER);
-    }
-
-    private Cell findCellInRow(Row row, String searchText) {
-        for (int col = 0; col < row.getLastCellNum(); col++) {
-            Cell cell = row.getCell(col);
-            if (cell != null && searchText.equalsIgnoreCase(cell.toString().trim())) {
-                return cell;
-            }
-        }
-        return null;
-    }
-
-    public Cell findFirstBatchCell(Sheet sheet) {
-        Cell hoursCell = findHoursCell(sheet, findDayCell(sheet));
-        if (hoursCell == null) {
-            return null;
-        }
-
-        Row row = sheet.getRow(hoursCell.getRowIndex());
-        return row != null ? row.getCell(hoursCell.getColumnIndex() + 1) : null;
-    }
-
-    public Cell findCellToRightOfDay(Sheet sheet) {
-        Cell dayCell = findDayCell(sheet);
-        if (dayCell == null) {
-            return null;
-        }
-
-        Row row = dayCell.getRow();
-        return row.getCell(dayCell.getColumnIndex() + 1);
     }
 
     public static List<DayCellCache> buildDayCellCache(Sheet sheet, Cell firstSlotCell) {

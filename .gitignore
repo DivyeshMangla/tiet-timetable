@@ -33,3 +33,6 @@ Thumbs.db
 # Excel input/output
 *.xlsx
 *.xls
+
+# Temporary code file
+/TempCode.txt
