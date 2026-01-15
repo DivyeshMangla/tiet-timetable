@@ -15,9 +15,6 @@ public enum TimeSlot {
     T9("14:40", "15:30"),
     T10("15:30", "16:20"),
     T11("16:20", "17:10"),
-    T12("17:10", "18:00"),
-    T13("18:00", "18:50"),
-    T14("18:50", "19:40")
     ;
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("HH:mm");
