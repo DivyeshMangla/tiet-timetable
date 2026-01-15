@@ -3,7 +3,6 @@ package io.github.divyeshmangla.timetable.parser.reader;
 import io.github.divyeshmangla.timetable.excel.CellUtils;
 import io.github.divyeshmangla.timetable.model.ClassInfo;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 
@@ -15,18 +14,22 @@ public class LargeClassReader implements ClassReader {
     @Override
     public boolean matches(Cell cell) {
         if (cell == null) return false;
-        
-        CellRangeAddress range = getHorizontalMergedRegion(cell.getSheet(), cell.getRowIndex(), cell.getColumnIndex());
-        if (range == null) return false;
 
-        // Verify first cell in merge is a subject code
+        CellRangeAddress range = getHorizontalMergedRegion(cell.getSheet(), cell.getRowIndex(), cell.getColumnIndex());
+        if (range == null || !isWideEnough(range)) return false;
+
         Cell firstCell = CellUtils.getCell(cell.getSheet(), range.getFirstRow(), range.getFirstColumn());
-        return CellUtils.isSubjectCode(firstCell);
+        if (firstCell == null) return false;
+
+        var parsed = parseCode(firstCell.toString().trim());
+        if (parsed == null) return false;
+
+        return CellUtils.isSubjectCode(parsed.getLeft());
     }
 
     @Override
     public ClassInfo read(Cell anyCellInMerge) {
-        if (!matches(anyCellInMerge)) return null;
+        if (anyCellInMerge == null) return null;
 
         Sheet sheet = anyCellInMerge.getSheet();
         int row = anyCellInMerge.getRowIndex();
@@ -38,20 +41,31 @@ public class LargeClassReader implements ClassReader {
         int startCol = range.getFirstColumn();
         int endCol = range.getLastColumn();
 
-        Row subjectRow = sheet.getRow(row);
-        Cell classCodeCell = subjectRow != null ? subjectRow.getCell(startCol) : null;
+        Cell classCodeCell = CellUtils.getCell(sheet, row, startCol);
         Cell roomCell = CellUtils.getCell(sheet, row + 1, startCol);
         Cell teacherCell = CellUtils.getCell(sheet, row + 1, endCol);
 
-        if (classCodeCell == null || roomCell == null || teacherCell == null) {
-            return null;
-        }
+        if (classCodeCell == null || roomCell == null || teacherCell == null) return null;
+
+        var parsed = parseCode(classCodeCell.toString().trim());
+        if (parsed == null) return null;
+
+        String teacher = teacherCell.toString().trim();
+        if (!isValidTeacher(teacher)) return null;
+
+        int width = endCol - startCol + 1;
 
         return new ClassInfo(
-                classCodeCell.toString().trim(),
+                parsed.getLeft(),
                 roomCell.toString().trim(),
-                teacherCell.toString().trim()
+                teacher,
+                "LARGE-" + width
         );
+
+    }
+
+    private static boolean isValidTeacher(String teacher) {
+        return teacher != null && !teacher.isBlank() && teacher.matches("[A-Za-z. ]+");
     }
 
     private static CellRangeAddress getHorizontalMergedRegion(Sheet sheet, int row, int col) {
@@ -63,7 +77,10 @@ public class LargeClassReader implements ClassReader {
                 return region;
             }
         }
-
         return null;
+    }
+
+    private static boolean isWideEnough(CellRangeAddress range) {
+        return (range.getLastColumn() - range.getFirstColumn()) > 2;
     }
 }

@@ -23,25 +23,42 @@ public class SingleClassReader implements ClassReader {
         int col = startCell.getColumnIndex();
 
         Cell subjectCell = CellUtils.getCell(sheet, row, col);
+        if (subjectCell == null) return false;
+
+        var parsed = parseCode(subjectCell.toString().trim());
+        if (parsed == null || !CellUtils.isSubjectCode(parsed.getLeft())) {
+            return false;
+        }
+
         Cell roomCell = CellUtils.getCell(sheet, row + 1, col);
         Cell teacherCell = CellUtils.getCell(sheet, row + 1, col + 1);
 
-        return CellUtils.isSubjectCode(subjectCell) && isValid(roomCell) && isValid(teacherCell);
+        if (!isValid(roomCell) || !isValid(teacherCell)) {
+            return false;
+        }
+
+        // enforce strict column distance: teacher must be exactly +1 (Apache POI can be inconsistent with empty cells)
+        return teacherCell.getColumnIndex() - roomCell.getColumnIndex() == 1;
     }
 
     @Override
     public ClassInfo read(Cell startCell) {
-        if (!matches(startCell)) return null;
+        if (startCell == null) return null;
 
         Sheet sheet = startCell.getSheet();
         int row = startCell.getRowIndex();
         int col = startCell.getColumnIndex();
 
-        String subjectCode = CellUtils.getCell(sheet, row, col).toString().trim();
+        Cell subjectCell = CellUtils.getCell(sheet, row, col);
+        if (subjectCell == null) return null;
+
+        var parsed = parseCode(subjectCell.toString().trim());
+        if (parsed == null) return null;
+
         String room = CellUtils.getCell(sheet, row + 1, col).toString().trim();
         String teacher = CellUtils.getCell(sheet, row + 1, col + 1).toString().trim();
 
-        return new ClassInfo(subjectCode, room, teacher);
+        return new ClassInfo(parsed.getLeft(), room, teacher, "SINGLE-" + CellUtils.getCellAddress(startCell));
     }
 
     private static boolean isValid(Cell cell) {

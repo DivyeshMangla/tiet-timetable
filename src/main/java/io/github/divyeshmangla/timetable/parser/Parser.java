@@ -5,6 +5,7 @@ import io.github.divyeshmangla.timetable.excel.CellUtils;
 import io.github.divyeshmangla.timetable.model.Day;
 import io.github.divyeshmangla.timetable.model.TimeSlot;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -20,6 +21,26 @@ public class Parser {
     public Parser(Workbook workbook, Config config) {
         this.workbook = workbook;
         this.config = config;
+
+        var sheet = workbook.getSheet("1ST YEAR A");
+        var rightDayCell = findCellToRightOfDay(sheet);
+        var dayCaches = buildDayCellCache(sheet, rightDayCell);
+
+        var batchExtractor = new BatchExtractor(sheet);
+        var classExtractor = new ClassExtractor();
+        var AElevenCells = batchExtractor.extract().get("1A11");
+
+        for (DayCellCache cache : dayCaches) {
+            var column = AElevenCells.getColumnIndex();
+
+            System.out.println(cache.day());
+            cache.slots().forEach((slot, cell) -> {
+                var row = cell.getRowIndex();
+                var aCell = CellUtils.getCell(sheet, row, column);
+                var classInfo = classExtractor.extract(aCell);
+                if (classInfo != null) System.out.println(classInfo);
+            });
+        }
     }
 
     public List<Sheet> getVisibleSheets() {
@@ -78,5 +99,15 @@ public class Parser {
         }
 
         return result;
+    }
+
+    public Cell findCellToRightOfDay(Sheet sheet) {
+        Cell dayCell = CellUtils.findCellInFirstColumn(sheet, "day");
+        if (dayCell == null) {
+            return null;
+        }
+
+        Row row = dayCell.getRow();
+        return row.getCell(dayCell.getColumnIndex() + 1);
     }
 }

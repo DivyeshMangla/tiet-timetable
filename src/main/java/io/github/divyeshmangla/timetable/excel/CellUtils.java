@@ -41,11 +41,16 @@ public final class CellUtils {
         return null;
     }
 
-    /**
-     * Checks if the cell contains a valid subject code (e.g., UES103, UPH102).
-     */
     public static boolean isSubjectCode(Cell cell) {
         String value = getCellString(cell);
         return SUBJECT_CODE_PATTERN.matcher(value).matches();
+    }
+
+    public static boolean isSubjectCode(String code) {
+        return SUBJECT_CODE_PATTERN.matcher(code).matches();
+    }
+
+    public static String getCellAddress(Cell cell) {
+        return cell.getAddress().formatAsString();
     }
 }

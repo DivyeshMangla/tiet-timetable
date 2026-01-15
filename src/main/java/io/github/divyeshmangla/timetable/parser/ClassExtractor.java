@@ -15,9 +15,9 @@ import java.util.List;
 public class ClassExtractor {
 
     private final List<ClassReader> readers = List.of(
+            new SingleClassReader(),
             new LargeClassReader(),
-            new BlockClassReader(),
-            new SingleClassReader()
+            new BlockClassReader()
     );
 
     public ClassInfo extract(Cell cell) {

@@ -10,7 +10,7 @@ import org.apache.poi.ss.usermodel.Sheet;
  * <pre>
  * SUBJECT_CODE
  * ROOM
- * (ignored)
+ * (optional ignored row)
  * TEACHER_CODE
  * </pre>
  */
@@ -24,28 +24,63 @@ public class BlockClassReader implements ClassReader {
         int row = startCell.getRowIndex();
         int col = startCell.getColumnIndex();
 
-        Cell subjectCodeCell = CellUtils.getCell(sheet, row, col);
-        Cell roomCell = CellUtils.getCell(sheet, row + 1, col);
-        Cell row3Cell = CellUtils.getCell(sheet, row + 2, col);
-        Cell teacherCodeCell = CellUtils.getCell(sheet, row + 3, col);
+        Cell subjectCell = CellUtils.getCell(sheet, row, col);
+        if (!isValid(subjectCell)) return false;
 
-        return CellUtils.isSubjectCode(subjectCodeCell) 
-                && isValid(roomCell) && isValid(row3Cell) && isValid(teacherCodeCell);
+        var parsed = parseCode(subjectCell.toString().trim());
+        if (parsed == null || !CellUtils.isSubjectCode(parsed.getLeft())) {
+            return false;
+        }
+
+        Cell roomCell = CellUtils.getCell(sheet, row + 1, col);
+        if (!isValid(roomCell)) return false;
+
+        Cell row2 = CellUtils.getCell(sheet, row + 2, col);
+        Cell row3 = CellUtils.getCell(sheet, row + 3, col);
+
+        // Layout A: ignored row present, teacher at row+3
+        if (isValid(row2) && isValid(row3)) {
+            return true;
+        }
+
+        // Layout B: ignored row missing, teacher at row+2
+        if (isValid(row2) && !isValid(row3)) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override
     public ClassInfo read(Cell startCell) {
-        if (!matches(startCell)) return null;
+        if (startCell == null) return null;
 
         Sheet sheet = startCell.getSheet();
         int row = startCell.getRowIndex();
         int col = startCell.getColumnIndex();
 
-        String subjectCode = CellUtils.getCell(sheet, row, col).toString().trim();
-        String room = CellUtils.getCell(sheet, row + 1, col).toString().trim();
-        String teacher = CellUtils.getCell(sheet, row + 3, col).toString().trim();
+        Cell subjectCell = CellUtils.getCell(sheet, row, col);
+        if (!isValid(subjectCell)) return null;
 
-        return new ClassInfo(subjectCode, room, teacher);
+        var parsed = parseCode(subjectCell.toString().trim());
+        if (parsed == null) return null;
+
+        String subjectCode = parsed.getLeft();
+
+        Cell roomCell = CellUtils.getCell(sheet, row + 1, col);
+        if (!isValid(roomCell)) return null;
+        String room = roomCell.toString().trim();
+
+        Cell teacherCell = CellUtils.getCell(sheet, row + 3, col);
+        if (!isValid(teacherCell)) {
+            teacherCell = CellUtils.getCell(sheet, row + 2, col);
+        }
+
+        if (!isValid(teacherCell)) return null;
+
+        String teacher = teacherCell.toString().trim();
+
+        return new ClassInfo(subjectCode, room, teacher, "BLOCK");
     }
 
     private static boolean isValid(Cell cell) {
