@@ -41,11 +41,6 @@ public final class CellUtils {
         return null;
     }
 
-    public static boolean isSubjectCode(Cell cell) {
-        String value = getCellString(cell);
-        return SUBJECT_CODE_PATTERN.matcher(value).matches();
-    }
-
     public static boolean isSubjectCode(String code) {
         return SUBJECT_CODE_PATTERN.matcher(code).matches();
     }
