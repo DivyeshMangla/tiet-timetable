@@ -50,4 +50,13 @@ public final class CellUtils {
         return SUBJECT_CODE_PATTERN.matcher(code).matches();
     }
 
+    public static Cell findCellToRightOfDay(Sheet sheet) {
+        Cell dayCell = findCellInFirstColumn(sheet, "day");
+        if (dayCell == null) {
+            return null;
+        }
+
+        Row row = dayCell.getRow();
+        return row.getCell(dayCell.getColumnIndex() + 1);
+    }
 }
