@@ -35,10 +35,8 @@ public final class TimetableEntryRenderer {
 
     private static void renderSingle(TimetableImageRenderer renderer, TimetableEntry entry) {
         ClassInfo info = entry.classInfo();
-
-        String label = info.subjectCode() + "-" + info.room();
         renderer.fillCell(entry.day(), entry.timeSlot(), CELL_FILL);
-        renderer.drawText(entry.day(), entry.timeSlot(), label, CELL_FONT, Color.BLACK);
+        renderer.drawTwoLines(entry.day(), entry.timeSlot(), info.subjectCode(), info.room(), CELL_FONT, Color.BLACK);
     }
 
     private static void renderBlockContinuation(TimetableImageRenderer renderer, TimetableEntry entry) {
@@ -58,8 +56,7 @@ public final class TimetableEntryRenderer {
         TimeSlot next = slots[idx + 1];
         ClassInfo info = entry.classInfo();
 
-        String label = info.subjectCode() + "-" + info.room();
         renderer.fillCell(entry.day(), next, CELL_FILL);
-        renderer.drawText(entry.day(), next, label, CELL_FONT, Color.BLACK);
+        renderer.drawTwoLines(entry.day(), next, info.subjectCode(), info.room(), CELL_FONT, Color.BLACK);
     }
 }

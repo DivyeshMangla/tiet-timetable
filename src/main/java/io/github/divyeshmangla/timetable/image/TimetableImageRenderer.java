@@ -21,7 +21,6 @@ public final class TimetableImageRenderer {
         if (in == null) throw new IllegalArgumentException("Background image not found: " + backgroundResourcePath);
 
         BufferedImage bg = ImageIO.read(in);
-
         this.image = new BufferedImage(bg.getWidth(), bg.getHeight(), BufferedImage.TYPE_INT_ARGB);
 
         this.g = image.createGraphics();
@@ -35,20 +34,29 @@ public final class TimetableImageRenderer {
         g.fillRect(c.x1(), c.y1(), c.width(), c.height());
     }
 
-    public void drawText(Day day, TimeSlot slot, String text, Font font, Color color) {
+    public void drawTwoLines(Day day, TimeSlot slot, String line1, String line2, Font font, Color color) {
         CellBounds c = TimetableGrid.getCell(day, slot);
 
         g.setFont(font);
         g.setColor(color);
 
         FontMetrics fm = g.getFontMetrics();
-        int tw = fm.stringWidth(text);
-        int th = fm.getAscent();
+        int lineHeight = fm.getHeight();
+        int ascent = fm.getAscent();
 
-        int x = c.x1() + (c.width() - tw) / 2;
-        int y = c.y1() + (c.height() + th) / 2 - 4;
+        int cellCenterY = c.y1() + c.height() / 2;
+        int offset = ascent / 4;
+        int firstLineBaseline = cellCenterY - lineHeight / 2 + offset;
+        int secondLineBaseline = cellCenterY + lineHeight / 2 + offset;
 
-        g.drawString(text, x, y);
+        int line1Width = fm.stringWidth(line1);
+        int line2Width = fm.stringWidth(line2);
+
+        int x1 = c.x1() + (c.width() - line1Width) / 2;
+        int x2 = c.x1() + (c.width() - line2Width) / 2;
+
+        g.drawString(line1, x1, firstLineBaseline);
+        g.drawString(line2, x2, secondLineBaseline);
     }
 
     public void save(Path output) throws IOException {
