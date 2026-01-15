@@ -1,5 +1,6 @@
 package io.github.divyeshmangla.timetable.parser.reader;
 
+import io.github.divyeshmangla.timetable.model.ClassType;
 import io.github.divyeshmangla.timetable.parser.CellUtils;
 import io.github.divyeshmangla.timetable.model.ClassInfo;
 import org.apache.poi.ss.usermodel.Cell;
@@ -62,6 +63,7 @@ public class BlockClassReader implements ClassReader {
         if (parsed == null) return null;
 
         String subjectCode = parsed.code();
+        ClassType classType = parsed.type();
 
         Cell roomCell = CellUtils.getCell(sheet, row + 1, col);
         if (!isValid(roomCell)) return null;
@@ -76,7 +78,7 @@ public class BlockClassReader implements ClassReader {
 
         String teacher = CellUtils.getCellString(teacherCell);
 
-        return new ClassInfo(subjectCode, room, teacher, true);
+        return new ClassInfo(subjectCode, classType, room, teacher, true);
     }
 
     private static boolean isValid(Cell cell) {

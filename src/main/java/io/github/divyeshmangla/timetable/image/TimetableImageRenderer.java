@@ -12,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class TimetableImageRenderer {
+    private static final int GRID_LINE_THICKNESS = 4;
+    
     private final BufferedImage image;
     private final Graphics2D g;
 
@@ -34,9 +36,26 @@ public final class TimetableImageRenderer {
         g.fillRect(c.x1(), c.y1(), c.width(), c.height());
     }
 
+    public void fillCombinedCell(Day day, TimeSlot slot1, TimeSlot slot2, Color color) {
+        CellBounds c = TimetableGrid.getCombinedCell(day, slot1, slot2);
+        g.clearRect(c.x1() - GRID_LINE_THICKNESS, c.y1() - GRID_LINE_THICKNESS, 
+                    c.width() + 2 * GRID_LINE_THICKNESS, c.height() + 2 * GRID_LINE_THICKNESS);
+        g.setColor(color);
+        g.fillRect(c.x1() - GRID_LINE_THICKNESS, c.y1() - GRID_LINE_THICKNESS, 
+                   c.width() + 2 * GRID_LINE_THICKNESS, c.height() + 2 * GRID_LINE_THICKNESS);
+    }
+
     public void drawTwoLines(Day day, TimeSlot slot, String line1, String line2, Font font, Color color) {
         CellBounds c = TimetableGrid.getCell(day, slot);
+        drawTwoLinesInBounds(c, line1, line2, font, color);
+    }
 
+    public void drawTwoLinesInCombinedCell(Day day, TimeSlot slot1, TimeSlot slot2, String line1, String line2, Font font, Color color) {
+        CellBounds c = TimetableGrid.getCombinedCell(day, slot1, slot2);
+        drawTwoLinesInBounds(c, line1, line2, font, color);
+    }
+
+    private void drawTwoLinesInBounds(CellBounds c, String line1, String line2, Font font, Color color) {
         g.setFont(font);
         g.setColor(color);
 

@@ -58,7 +58,7 @@ public class SingleClassReader implements ClassReader {
         String room = CellUtils.getCellString(CellUtils.getCell(sheet, row + 1, col));
         String teacher = CellUtils.getCellString(CellUtils.getCell(sheet, row + 1, col + 1));
 
-        return new ClassInfo(parsed.code(), room, teacher, false);
+        return new ClassInfo(parsed.code(), parsed.type(), room, teacher, false);
     }
 
     private static boolean isValid(Cell cell) {

@@ -55,6 +55,7 @@ public class LargeClassReader implements ClassReader {
 
         return new ClassInfo(
                 parsed.code(),
+                parsed.type(),
                 CellUtils.getCellString(roomCell),
                 teacher,
                 false

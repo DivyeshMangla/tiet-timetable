@@ -9,12 +9,28 @@ import java.util.Map;
 public final class TimetableGrid {
 
     private static final int[] X_LINES = {
-            327, 674, 1024, 1373, 1721, 2070, 2409
+            328, // 1
+            673, // 2
+            1027,// 3
+            1376,// 4
+            1726,// 5
+            2075,// 6
+            2409 // 7
     };
 
     private static final int[] Y_LINES = {
-            276, 402, 532, 657, 777, 903,
-            1029, 1153, 1279, 1405, 1529, 1654
+            277, // 1
+            402, // 2
+            533, // 3
+            657, // 4
+            776, // 5
+            901, // 6
+            1031,// 7
+            1157,// 8
+            1281,// 9
+            1406,// 10
+            1534,// 11
+            1662 // 12
     };
 
     /**
@@ -36,8 +52,7 @@ public final class TimetableGrid {
 
     private static final Day[] DAYS = Day.values();
 
-    private static final Map<Day, Map<TimeSlot, CellBounds>> GRID =
-            new EnumMap<>(Day.class);
+    private static final Map<Day, Map<TimeSlot, CellBounds>> GRID = new EnumMap<>(Day.class);
 
     static {
         for (int col = 0; col < DAYS.length; col++) {
@@ -69,5 +84,17 @@ public final class TimetableGrid {
             );
         }
         return c;
+    }
+
+    public static CellBounds getCombinedCell(Day day, TimeSlot slot1, TimeSlot slot2) {
+        CellBounds c1 = getCell(day, slot1);
+        CellBounds c2 = getCell(day, slot2);
+        
+        int minX = Math.min(c1.x1(), c2.x1());
+        int minY = Math.min(c1.y1(), c2.y1());
+        int maxX = Math.max(c1.x2(), c2.x2());
+        int maxY = Math.max(c1.y2(), c2.y2());
+        
+        return new CellBounds(minX, minY, maxX, maxY);
     }
 }
