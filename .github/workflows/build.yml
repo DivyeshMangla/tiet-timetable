@@ -37,4 +37,3 @@ jobs:
         sleep 10
         docker stop test-container
         docker rm test-container
-
