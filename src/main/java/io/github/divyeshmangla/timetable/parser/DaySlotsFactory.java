@@ -20,8 +20,12 @@ class DaySlotsFactory {
             finalizeCurrentDay();
         }
 
-        TimeSlot slot = TimeSlot.fromNumber(slotNumber);
-        currentDaySlots.put(slot, cell);
+        try {
+            TimeSlot slot = TimeSlot.fromNumber(slotNumber);
+            currentDaySlots.put(slot, cell);
+        } catch (IllegalArgumentException e) {
+            // ignored
+        }
     }
 
     private boolean isDayBoundary(Integer slotNumber) {

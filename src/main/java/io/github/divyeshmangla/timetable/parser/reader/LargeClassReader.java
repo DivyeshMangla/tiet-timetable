@@ -53,13 +53,11 @@ public class LargeClassReader implements ClassReader {
         String teacher = CellUtils.getCellString(teacherCell);
         if (!isValidTeacher(teacher)) return null;
 
-        int width = endCol - startCol + 1;
-
         return new ClassInfo(
                 parsed.code(),
                 CellUtils.getCellString(roomCell),
                 teacher,
-                "LARGE-" + width
+                false
         );
 
     }

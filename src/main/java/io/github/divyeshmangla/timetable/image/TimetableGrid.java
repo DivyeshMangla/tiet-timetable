@@ -40,13 +40,6 @@ public final class TimetableGrid {
             new EnumMap<>(Day.class);
 
     static {
-        // Safety check (fail fast if someone edits arrays wrong)
-        if (GRID_TIMES.length + 1 != Y_LINES.length) {
-            throw new IllegalStateException(
-                    "GRID_TIMES and Y_LINES length mismatch"
-            );
-        }
-
         for (int col = 0; col < DAYS.length; col++) {
             Day day = DAYS[col];
             Map<TimeSlot, CellBounds> colMap = new EnumMap<>(TimeSlot.class);

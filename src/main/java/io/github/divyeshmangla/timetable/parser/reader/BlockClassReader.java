@@ -76,7 +76,7 @@ public class BlockClassReader implements ClassReader {
 
         String teacher = CellUtils.getCellString(teacherCell);
 
-        return new ClassInfo(subjectCode, room, teacher, "BLOCK");
+        return new ClassInfo(subjectCode, room, teacher, true);
     }
 
     private static boolean isValid(Cell cell) {

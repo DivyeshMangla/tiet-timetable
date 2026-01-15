@@ -7,6 +7,6 @@ public record ClassInfo(
         String subjectCode,
         String room,
         String teacher,
-        String temp
+        boolean isBlock
 ) {}
 

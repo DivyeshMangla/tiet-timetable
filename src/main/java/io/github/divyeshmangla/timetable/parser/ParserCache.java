@@ -9,10 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Cache containing all pre-computed data needed for parsing batches.
- * Contains batch mappings and day slots for each sheet.
- */
 public record ParserCache(
         Map<Sheet, Map<String, Cell>> batches,
         Map<Sheet, List<DaySlots>> daySlots
@@ -22,9 +18,6 @@ public record ParserCache(
         daySlots = Map.copyOf(daySlots);
     }
 
-    /**
-     * Builds a ParserCache from a workbook by processing all visible sheets.
-     */
     public static ParserCache fromWorkbook(Workbook workbook) {
         Map<Sheet, Map<String, Cell>> batches = new HashMap<>();
         Map<Sheet, List<DaySlots>> daySlots = new HashMap<>();
@@ -47,14 +40,12 @@ public record ParserCache(
             Map<Sheet, List<DaySlots>> daySlots) {
 
         try {
-            // Extract batches
             var batchExtractor = new BatchExtractor(sheet);
             Map<String, Cell> sheetBatches = batchExtractor.extract();
             if (!sheetBatches.isEmpty()) {
                 batches.put(sheet, sheetBatches);
             }
 
-            // Extract day slots
             Cell firstSlotCell = CellUtils.findCellToRightOfDay(sheet);
             if (firstSlotCell != null) {
                 List<DaySlots> slots = DaySlots.buildFromSheet(sheet, firstSlotCell);
