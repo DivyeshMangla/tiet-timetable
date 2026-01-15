@@ -1,5 +1,7 @@
 plugins {
     java
+    id("org.springframework.boot") version "3.4.1"
+    id("io.spring.dependency-management") version "1.1.7"
 }
 
 group = "io.github.divyeshmangla"
@@ -10,6 +12,9 @@ repositories {
 }
 
 dependencies {
+    // Spring Boot
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    
     // https://mvnrepository.com/artifact/org.apache.poi/poi
     implementation("org.apache.poi:poi:5.5.1")
 

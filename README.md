@@ -8,7 +8,14 @@ This project focuses on reading the official TIET timetable Excel file and conve
 ## How It Works
 The parser downloads the timetable Excel file, extracts batch information and day slots for each sheet, and builds a cache for fast lookups. You can then query specific batches to get their complete timetable entries.
 
-## Usage
+## REST API Endpoints
+
+- `GET /api/timetable/sheets` - Get all sheet names
+- `GET /api/timetable/sheets/{sheetName}/batches` - Get batches for a sheet
+- `GET /api/timetable/sheets/{sheetName}/batches/{batchName}` - Get timetable entries
+- `GET /api/timetable/sheets/{sheetName}/batches/{batchName}/png` - Get timetable PNG image
+
+## Usage (Programmatic)
 
 ```java
 // Load configuration and create parser
@@ -28,9 +35,22 @@ TimetableEntryRenderer.render(renderer, entries);
 renderer.save(Path.of("out.png"));
 ```
 
+## Running the Application
+
+```bash
+# Build the project
+./gradlew build
+
+# Run the Spring Boot application
+./gradlew bootRun
+```
+
+The API will be available at `http://localhost:8080`
+
 ## Tech Stack
 - Java
 - Apache POI
+- SpringBoot
 - SnakeYAML
 - Gradle
 

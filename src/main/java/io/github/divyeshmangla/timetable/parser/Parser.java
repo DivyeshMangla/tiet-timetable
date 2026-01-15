@@ -44,6 +44,20 @@ public class Parser {
                 .findFirst();
     }
 
+    public List<String> getSheetNames() {
+        return cache.batches().keySet().stream()
+                .map(Sheet::getSheetName)
+                .toList();
+    }
+
+    public List<String> getBatchNames(String sheetName) {
+        return getSheetByName(sheetName)
+                .map(cache.batches()::get)
+                .map(Map::keySet)
+                .map(batchNames -> batchNames.stream().toList())
+                .orElse(List.of());
+    }
+
     public Optional<Cell> getBatch(Sheet sheet, String batchName) {
         return Optional
                 .ofNullable(cache.batches().get(sheet))
