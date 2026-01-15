@@ -7,6 +7,12 @@ plugins {
 group = "io.github.divyeshmangla"
 version = "1.0.0"
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
 repositories {
     mavenCentral()
 }

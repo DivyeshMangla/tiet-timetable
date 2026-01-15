@@ -1,0 +1,16 @@
+build/
+.gradle/
+out/
+.idea/
+.vscode/
+*.iml
+.git/
+.gitignore
+.gitattributes
+*.md
+!README.md
+.DS_Store
+*.log
+*.tmp
+.env
+
