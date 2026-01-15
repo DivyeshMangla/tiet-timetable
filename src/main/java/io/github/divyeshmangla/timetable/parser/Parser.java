@@ -2,17 +2,13 @@ package io.github.divyeshmangla.timetable.parser;
 
 import io.github.divyeshmangla.timetable.config.Config;
 import io.github.divyeshmangla.timetable.excel.CellUtils;
-import io.github.divyeshmangla.timetable.model.Day;
-import io.github.divyeshmangla.timetable.model.TimeSlot;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.IntStream;
 
 public class Parser {
     private final Workbook workbook;
@@ -21,87 +17,24 @@ public class Parser {
     public Parser(Workbook workbook, Config config) {
         this.workbook = workbook;
         this.config = config;
-
-        var sheet = workbook.getSheet("1ST YEAR A");
-        var rightDayCell = findCellToRightOfDay(sheet);
-        var dayCaches = buildDayCellCache(sheet, rightDayCell);
-
-        var batchExtractor = new BatchExtractor(sheet);
-        var classExtractor = new ClassExtractor();
-        var AElevenCells = batchExtractor.extract().get("1A11");
-
-        for (DayCellCache cache : dayCaches) {
-            var column = AElevenCells.getColumnIndex();
-
-            System.out.println(cache.day());
-            cache.slots().forEach((slot, cell) -> {
-                var row = cell.getRowIndex();
-                var aCell = CellUtils.getCell(sheet, row, column);
-                var classInfo = classExtractor.extract(aCell);
-                if (classInfo != null) System.out.println(classInfo);
-            });
-        }
     }
 
     public List<Sheet> getVisibleSheets() {
-        List<Sheet> sheets = new ArrayList<>();
-
-        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-            if (!isSheetHidden(i)) {
-                sheets.add(workbook.getSheetAt(i));
-            }
-        }
-
-        return List.copyOf(sheets);
+        return IntStream.range(0, workbook.getNumberOfSheets())
+                .filter(i -> !isSheetHidden(i))
+                .mapToObj(workbook::getSheetAt)
+                .toList();
     }
 
     private boolean isSheetHidden(int index) {
         return workbook.isSheetHidden(index) || workbook.isSheetVeryHidden(index);
     }
 
-    public List<DayCellCache> buildDayCellCache(Sheet sheet, Cell firstSlotCell) {
-        List<DayCellCache> result = new ArrayList<>();
-
-        if (sheet == null || firstSlotCell == null) return result;
-
-        int column = firstSlotCell.getColumnIndex();
-        int startRow = firstSlotCell.getRowIndex();
-        Day[] days = Day.values();
-
-        int currentDayIndex = 0;
-        Map<TimeSlot, Cell> currentDaySlots = new EnumMap<>(TimeSlot.class);
-
-        for (int row = startRow; row <= sheet.getLastRowNum() && currentDayIndex < days.length; row++) {
-            Cell cell = CellUtils.getCell(sheet, row, column);
-            if (cell == null) continue;
-
-
-            Integer slotNumber = CellUtils.parseSlotNumber(cell);
-            if (slotNumber == null) continue;
-
-
-            // Detect new day when slot resets to 1
-            if (slotNumber == 1 && !currentDaySlots.isEmpty()) {
-                result.add(new DayCellCache(days[currentDayIndex], currentDaySlots));
-                currentDayIndex++;
-                currentDaySlots = new EnumMap<>(TimeSlot.class);
-
-                if (currentDayIndex >= days.length) break;
-            }
-
-            TimeSlot slot = TimeSlot.fromNumber(slotNumber);
-            currentDaySlots.put(slot, cell);
-        }
-
-        // Add final day if it has slots
-        if (!currentDaySlots.isEmpty() && currentDayIndex < days.length) {
-            result.add(new DayCellCache(days[currentDayIndex], currentDaySlots));
-        }
-
-        return result;
+    public List<DaySlots> buildDaySlots(Sheet sheet, Cell firstSlotCell) {
+        return DaySlots.buildFromSheet(sheet, firstSlotCell);
     }
 
-    public Cell findCellToRightOfDay(Sheet sheet) {
+    private Cell findCellToRightOfDay(Sheet sheet) {
         Cell dayCell = CellUtils.findCellInFirstColumn(sheet, "day");
         if (dayCell == null) {
             return null;
