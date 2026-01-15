@@ -1,6 +1,6 @@
 package io.github.divyeshmangla.timetable.parser.reader;
 
-import io.github.divyeshmangla.timetable.excel.CellUtils;
+import io.github.divyeshmangla.timetable.parser.CellUtils;
 import io.github.divyeshmangla.timetable.model.ClassInfo;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -21,10 +21,10 @@ public class LargeClassReader implements ClassReader {
         Cell firstCell = CellUtils.getCell(cell.getSheet(), range.getFirstRow(), range.getFirstColumn());
         if (firstCell == null) return false;
 
-        var parsed = parseCode(firstCell.toString().trim());
+        var parsed = parseCode(CellUtils.getCellString(firstCell));
         if (parsed == null) return false;
 
-        return CellUtils.isSubjectCode(parsed.getLeft());
+        return CellUtils.isSubjectCode(parsed.code());
     }
 
     @Override
@@ -47,17 +47,17 @@ public class LargeClassReader implements ClassReader {
 
         if (classCodeCell == null || roomCell == null || teacherCell == null) return null;
 
-        var parsed = parseCode(classCodeCell.toString().trim());
+        var parsed = parseCode(CellUtils.getCellString(classCodeCell));
         if (parsed == null) return null;
 
-        String teacher = teacherCell.toString().trim();
+        String teacher = CellUtils.getCellString(teacherCell);
         if (!isValidTeacher(teacher)) return null;
 
         int width = endCol - startCol + 1;
 
         return new ClassInfo(
-                parsed.getLeft(),
-                roomCell.toString().trim(),
+                parsed.code(),
+                CellUtils.getCellString(roomCell),
                 teacher,
                 "LARGE-" + width
         );

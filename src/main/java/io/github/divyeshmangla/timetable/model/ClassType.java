@@ -4,7 +4,6 @@ public enum ClassType {
     LECTURE('L'),
     TUTORIAL('T'),
     PRACTICAL('P'),
-    LAB('L'),
     ;
 
     private final char suffix;

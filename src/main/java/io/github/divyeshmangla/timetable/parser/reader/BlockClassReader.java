@@ -1,6 +1,6 @@
 package io.github.divyeshmangla.timetable.parser.reader;
 
-import io.github.divyeshmangla.timetable.excel.CellUtils;
+import io.github.divyeshmangla.timetable.parser.CellUtils;
 import io.github.divyeshmangla.timetable.model.ClassInfo;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -27,8 +27,8 @@ public class BlockClassReader implements ClassReader {
         Cell subjectCell = CellUtils.getCell(sheet, row, col);
         if (!isValid(subjectCell)) return false;
 
-        var parsed = parseCode(subjectCell.toString().trim());
-        if (parsed == null || !CellUtils.isSubjectCode(parsed.getLeft())) {
+        var parsed = parseCode(CellUtils.getCellString(subjectCell));
+        if (parsed == null || !CellUtils.isSubjectCode(parsed.code())) {
             return false;
         }
 
@@ -44,11 +44,7 @@ public class BlockClassReader implements ClassReader {
         }
 
         // Layout B: ignored row missing, teacher at row+2
-        if (isValid(row2) && !isValid(row3)) {
-            return true;
-        }
-
-        return false;
+        return (isValid(row2) && !isValid(row3));
     }
 
     @Override
@@ -62,14 +58,14 @@ public class BlockClassReader implements ClassReader {
         Cell subjectCell = CellUtils.getCell(sheet, row, col);
         if (!isValid(subjectCell)) return null;
 
-        var parsed = parseCode(subjectCell.toString().trim());
+        var parsed = parseCode(CellUtils.getCellString(subjectCell));
         if (parsed == null) return null;
 
-        String subjectCode = parsed.getLeft();
+        String subjectCode = parsed.code();
 
         Cell roomCell = CellUtils.getCell(sheet, row + 1, col);
         if (!isValid(roomCell)) return null;
-        String room = roomCell.toString().trim();
+        String room = CellUtils.getCellString(roomCell);
 
         Cell teacherCell = CellUtils.getCell(sheet, row + 3, col);
         if (!isValid(teacherCell)) {
@@ -78,12 +74,12 @@ public class BlockClassReader implements ClassReader {
 
         if (!isValid(teacherCell)) return null;
 
-        String teacher = teacherCell.toString().trim();
+        String teacher = CellUtils.getCellString(teacherCell);
 
         return new ClassInfo(subjectCode, room, teacher, "BLOCK");
     }
 
     private static boolean isValid(Cell cell) {
-        return cell != null && !cell.toString().trim().isEmpty();
+        return cell != null && !CellUtils.getCellString(cell).isBlank();
     }
 }

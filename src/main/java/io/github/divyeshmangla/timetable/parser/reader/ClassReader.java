@@ -3,7 +3,6 @@ package io.github.divyeshmangla.timetable.parser.reader;
 import io.github.divyeshmangla.timetable.model.ClassInfo;
 import io.github.divyeshmangla.timetable.model.ClassType;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Strategy interface for reading different class layout patterns from Excel cells.
@@ -24,9 +23,9 @@ public interface ClassReader {
     /**
      * Parses a subject code by extracting the class type suffix.
      * @param code Subject code with type suffix (e.g., "CS101L", "MATH203T")
-     * @return Pair of (code without suffix, ClassType) or null if invalid
+     * @return ParsedCode with code without suffix and ClassType, or null if invalid
      */
-    default Pair<String, ClassType> parseCode(String code) {
+    default ParsedCode parseCode(String code) {
         if (code == null || code.isEmpty()) {
             return null;
         }
@@ -35,6 +34,15 @@ public interface ClassReader {
         String codeWithoutSuffix = code.substring(0, code.length() - 1);
 
         ClassType type = ClassType.fromSuffix(lastChar);
-        return Pair.of(codeWithoutSuffix, type);
+        if (type == null) {
+            return null;
+        }
+        
+        return new ParsedCode(codeWithoutSuffix, type);
     }
+
+    /**
+     * Represents a parsed subject code with its type.
+     */
+    record ParsedCode(String code, ClassType type) {}
 }

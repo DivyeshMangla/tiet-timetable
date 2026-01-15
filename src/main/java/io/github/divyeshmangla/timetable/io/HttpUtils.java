@@ -41,16 +41,31 @@ public final class HttpUtils {
     private static SSLContext trustAll() {
         try {
             var ctx = SSLContext.getInstance("TLS");
-
-            ctx.init(null, new TrustManager[]{new X509TrustManager() {
-                public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
-                public void checkClientTrusted(X509Certificate[] c, String t) {}
-                public void checkServerTrusted(X509Certificate[] c, String t) {}
-            }}, new SecureRandom());
-
+            ctx.init(null, new TrustManager[]{new TrustAllTrustManager()}, new SecureRandom());
             return ctx;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create SSL context", e);
+            throw new IllegalStateException("Failed to create SSL context", e);
+        }
+    }
+
+    /**
+     * Trust manager that accepts all certificates.
+     * WARNING: This is insecure and only used as a workaround for thapar.edu certificate issues.
+     */
+    private static class TrustAllTrustManager implements X509TrustManager {
+        @Override
+        public X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[0];
+        }
+
+        @Override
+        public void checkClientTrusted(X509Certificate[] chain, String authType) {
+            // Trust all clients
+        }
+
+        @Override
+        public void checkServerTrusted(X509Certificate[] chain, String authType) {
+            // Trust all servers
         }
     }
 }

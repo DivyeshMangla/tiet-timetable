@@ -34,7 +34,7 @@ public class Timetable {
         try (InputStream cfg = loader.resolve()) {
             Config config = ConfigLoader.parse(cfg);
             Workbook workbook = loadFromUrl(config.timetableUrl());
-            new Parser(workbook, config);
+            new Parser(workbook);
 
             LOGGER.info("Timetable loaded successfully");
         }

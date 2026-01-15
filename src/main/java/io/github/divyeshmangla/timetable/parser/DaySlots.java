@@ -1,6 +1,5 @@
 package io.github.divyeshmangla.timetable.parser;
 
-import io.github.divyeshmangla.timetable.excel.CellUtils;
 import io.github.divyeshmangla.timetable.model.Day;
 import io.github.divyeshmangla.timetable.model.TimeSlot;
 import org.apache.poi.ss.usermodel.Cell;

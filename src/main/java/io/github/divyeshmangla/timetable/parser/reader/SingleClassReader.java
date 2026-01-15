@@ -1,6 +1,6 @@
 package io.github.divyeshmangla.timetable.parser.reader;
 
-import io.github.divyeshmangla.timetable.excel.CellUtils;
+import io.github.divyeshmangla.timetable.parser.CellUtils;
 import io.github.divyeshmangla.timetable.model.ClassInfo;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -25,8 +25,8 @@ public class SingleClassReader implements ClassReader {
         Cell subjectCell = CellUtils.getCell(sheet, row, col);
         if (subjectCell == null) return false;
 
-        var parsed = parseCode(subjectCell.toString().trim());
-        if (parsed == null || !CellUtils.isSubjectCode(parsed.getLeft())) {
+        var parsed = parseCode(CellUtils.getCellString(subjectCell));
+        if (parsed == null || !CellUtils.isSubjectCode(parsed.code())) {
             return false;
         }
 
@@ -52,13 +52,13 @@ public class SingleClassReader implements ClassReader {
         Cell subjectCell = CellUtils.getCell(sheet, row, col);
         if (subjectCell == null) return null;
 
-        var parsed = parseCode(subjectCell.toString().trim());
+        var parsed = parseCode(CellUtils.getCellString(subjectCell));
         if (parsed == null) return null;
 
-        String room = CellUtils.getCell(sheet, row + 1, col).toString().trim();
-        String teacher = CellUtils.getCell(sheet, row + 1, col + 1).toString().trim();
+        String room = CellUtils.getCellString(CellUtils.getCell(sheet, row + 1, col));
+        String teacher = CellUtils.getCellString(CellUtils.getCell(sheet, row + 1, col + 1));
 
-        return new ClassInfo(parsed.getLeft(), room, teacher, "SINGLE-" + CellUtils.getCellAddress(startCell));
+        return new ClassInfo(parsed.code(), room, teacher, "SINGLE-" + startCell.getAddress().formatAsString());
     }
 
     private static boolean isValid(Cell cell) {

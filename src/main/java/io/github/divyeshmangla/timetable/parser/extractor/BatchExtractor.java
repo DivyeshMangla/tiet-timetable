@@ -1,6 +1,6 @@
-package io.github.divyeshmangla.timetable.parser;
+package io.github.divyeshmangla.timetable.parser.extractor;
 
-import io.github.divyeshmangla.timetable.excel.CellUtils;
+import io.github.divyeshmangla.timetable.parser.CellUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;

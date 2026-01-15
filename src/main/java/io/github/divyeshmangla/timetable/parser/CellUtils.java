@@ -1,4 +1,4 @@
-package io.github.divyeshmangla.timetable.excel;
+package io.github.divyeshmangla.timetable.parser;
 
 import org.apache.poi.ss.usermodel.*;
 
@@ -34,7 +34,7 @@ public final class CellUtils {
     public static Cell findCellInFirstColumn(Sheet sheet, String searchText) {
         for (int row = 0; row <= sheet.getLastRowNum(); row++) {
             Cell cell = CellUtils.getCell(sheet, row, 0);
-            if (cell != null && searchText.equalsIgnoreCase(cell.toString().trim())) {
+            if (cell != null && searchText.equalsIgnoreCase(getCellString(cell))) {
                 return cell;
             }
         }
@@ -50,7 +50,4 @@ public final class CellUtils {
         return SUBJECT_CODE_PATTERN.matcher(code).matches();
     }
 
-    public static String getCellAddress(Cell cell) {
-        return cell.getAddress().formatAsString();
-    }
 }

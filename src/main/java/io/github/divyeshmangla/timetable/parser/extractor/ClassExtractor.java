@@ -1,4 +1,4 @@
-package io.github.divyeshmangla.timetable.parser;
+package io.github.divyeshmangla.timetable.parser.extractor;
 
 import io.github.divyeshmangla.timetable.model.ClassInfo;
 import io.github.divyeshmangla.timetable.parser.reader.BlockClassReader;
@@ -8,6 +8,7 @@ import io.github.divyeshmangla.timetable.parser.reader.SingleClassReader;
 import org.apache.poi.ss.usermodel.Cell;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Orchestrates class extraction by trying each reader in order.
@@ -20,12 +21,13 @@ public class ClassExtractor {
             new BlockClassReader()
     );
 
-    public ClassInfo extract(Cell cell) {
+    public Optional<ClassInfo> extract(Cell cell) {
         for (ClassReader reader : readers) {
             if (reader.matches(cell)) {
-                return reader.read(cell);
+                ClassInfo info = reader.read(cell);
+                return Optional.ofNullable(info);
             }
         }
-        return null;
+        return Optional.empty();
     }
 }

@@ -30,10 +30,12 @@ public final class ConfigLoader {
      */
     public InputStream resolve() throws IOException {
         Path localConfig = Path.of(configFileName);
+
         if (Files.exists(localConfig)) {
             LOGGER.debug("Using local {}", configFileName);
             return Files.newInputStream(localConfig);
         }
+
         LOGGER.debug("Using bundled {}", configFileName);
         return getBundledConfig();
     }
@@ -70,12 +72,13 @@ public final class ConfigLoader {
 
         @SuppressWarnings("unchecked")
         Map<String, Object> timetable = (Map<String, Object>) root.get("timetable");
+        if (timetable == null) throw new IllegalStateException("Missing timetable section in config");
 
-        if (timetable == null || !timetable.containsKey("url")) {
-            throw new IllegalStateException("Missing timetable.url in config");
-        }
 
-        String timetableUrl = timetable.get("url").toString();
+        Object urlObj = timetable.get("url");
+        if (urlObj == null) throw new IllegalStateException("Missing timetable.url in config");
+
+        String timetableUrl = urlObj.toString();
 
         @SuppressWarnings("unchecked")
         Map<String, Object> subjectsNode = (Map<String, Object>) root.get("subjects");
@@ -108,9 +111,7 @@ public final class ConfigLoader {
                 .getClassLoader()
                 .getResourceAsStream(configFileName);
 
-        if (in == null) {
-            throw new IOException("Bundled " + configFileName + " not found in classpath");
-        }
+        if (in == null) throw new IOException("Bundled " + configFileName + " not found in classpath");
 
         return in;
     }
