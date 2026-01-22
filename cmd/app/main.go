@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
+	"github.com/DivyeshMangla/tiet-timetable/internal/api"
 	"github.com/DivyeshMangla/tiet-timetable/internal/config"
 	"github.com/DivyeshMangla/tiet-timetable/internal/io"
 	"github.com/DivyeshMangla/tiet-timetable/internal/parser"
@@ -13,6 +15,7 @@ import (
 )
 
 const configFile = "config.yml"
+const serverPort = ":8080"
 
 func main() {
 	loader := config.NewConfigLoader(configFile)
@@ -46,7 +49,12 @@ func main() {
 		log.Fatalf("Failed to populate registry: %v", err)
 	}
 
-	fmt.Println("Timetable loaded successfully")
+	router := api.SetupRoutes(reg)
+
+	fmt.Printf("Server starting on http://localhost%s\n", serverPort)
+	if err := http.ListenAndServe(serverPort, router); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
 }
 
 func loadFromURL(url string) (*excelize.File, error) {
