@@ -1,4 +1,4 @@
-package parser
+package utils
 
 import (
 	"regexp"
@@ -66,4 +66,15 @@ func FindCellToRightOfDay(file *excelize.File, sheetName string) (int, int, bool
 	}
 
 	return dayRow, dayCol + 1, true
+}
+
+func ToCellRef(row, col int) string {
+	colName := ""
+	colNum := col + 1
+	for colNum > 0 {
+		colNum--
+		colName = string(rune('A'+colNum%26)) + colName
+		colNum /= 26
+	}
+	return colName + strconv.Itoa(row+1)
 }

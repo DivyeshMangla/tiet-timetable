@@ -1,4 +1,4 @@
-package parser
+package utils
 
 import (
 	"github.com/DivyeshMangla/tiet-timetable/internal/model"

@@ -2,7 +2,7 @@ package readers
 
 import (
 	"github.com/DivyeshMangla/tiet-timetable/internal/model"
-	"github.com/DivyeshMangla/tiet-timetable/internal/parser"
+	"github.com/DivyeshMangla/tiet-timetable/internal/parser/utils"
 	"github.com/DivyeshMangla/tiet-timetable/internal/types"
 	"github.com/xuri/excelize/v2"
 )
@@ -10,62 +10,62 @@ import (
 type BlockClassReader struct{}
 
 func (r *BlockClassReader) Matches(file *excelize.File, sheetName string, row, col int) bool {
-	subjectValue, err := parser.GetCell(file, sheetName, row, col)
-	if err != nil || !isValid(subjectValue) {
+	subjectValue, err := utils.GetCell(file, sheetName, row, col)
+	if err != nil || !utils.IsValid(subjectValue) {
 		return false
 	}
 
-	parsed, ok := parser.ParseCode(parser.GetCellString(subjectValue))
-	if !ok || !parser.IsSubjectCode(string(parsed.Code)) {
+	parsed, ok := utils.ParseCode(utils.GetCellString(subjectValue))
+	if !ok || !utils.IsSubjectCode(string(parsed.Code)) {
 		return false
 	}
 
-	roomValue, err := parser.GetCell(file, sheetName, row+1, col)
-	if err != nil || !isValid(roomValue) {
+	roomValue, err := utils.GetCell(file, sheetName, row+1, col)
+	if err != nil || !utils.IsValid(roomValue) {
 		return false
 	}
 
-	row2Value, _ := parser.GetCell(file, sheetName, row+2, col)
-	row3Value, _ := parser.GetCell(file, sheetName, row+3, col)
+	row2Value, _ := utils.GetCell(file, sheetName, row+2, col)
+	row3Value, _ := utils.GetCell(file, sheetName, row+3, col)
 
-	if isValid(row2Value) && isValid(row3Value) {
+	if utils.IsValid(row2Value) && utils.IsValid(row3Value) {
 		return true
 	}
 
-	return isValid(row2Value) && !isValid(row3Value)
+	return utils.IsValid(row2Value) && !utils.IsValid(row3Value)
 }
 
 func (r *BlockClassReader) Read(file *excelize.File, sheetName string, row, col int) *model.ClassInfo {
-	subjectValue, err := parser.GetCell(file, sheetName, row, col)
-	if err != nil || !isValid(subjectValue) {
+	subjectValue, err := utils.GetCell(file, sheetName, row, col)
+	if err != nil || !utils.IsValid(subjectValue) {
 		return nil
 	}
 
-	parsed, ok := parser.ParseCode(parser.GetCellString(subjectValue))
+	parsed, ok := utils.ParseCode(utils.GetCellString(subjectValue))
 	if !ok {
 		return nil
 	}
 
-	roomValue, err := parser.GetCell(file, sheetName, row+1, col)
-	if err != nil || !isValid(roomValue) {
+	roomValue, err := utils.GetCell(file, sheetName, row+1, col)
+	if err != nil || !utils.IsValid(roomValue) {
 		return nil
 	}
 
-	room := parser.GetCellString(roomValue)
+	room := utils.GetCellString(roomValue)
 
-	teacherValue, err := parser.GetCell(file, sheetName, row+3, col)
-	if err != nil || !isValid(teacherValue) {
-		teacherValue, err = parser.GetCell(file, sheetName, row+2, col)
+	teacherValue, err := utils.GetCell(file, sheetName, row+3, col)
+	if err != nil || !utils.IsValid(teacherValue) {
+		teacherValue, err = utils.GetCell(file, sheetName, row+2, col)
 		if err != nil {
 			return nil
 		}
 	}
 
-	if !isValid(teacherValue) {
+	if !utils.IsValid(teacherValue) {
 		return nil
 	}
 
-	teacher := parser.GetCellString(teacherValue)
+	teacher := utils.GetCellString(teacherValue)
 
 	return &model.ClassInfo{
 		SubjectCode: parsed.Code,

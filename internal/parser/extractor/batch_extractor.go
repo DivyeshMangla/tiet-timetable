@@ -7,10 +7,15 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/DivyeshMangla/tiet-timetable/internal/parser"
+	"github.com/DivyeshMangla/tiet-timetable/internal/parser/utils"
 	"github.com/DivyeshMangla/tiet-timetable/internal/types"
 	"github.com/xuri/excelize/v2"
 )
+
+type CellLocation struct {
+	Row int
+	Col int
+}
 
 var batchRegex = regexp.MustCompile(`^\d[A-Z]\d[A-Z]$`)
 
@@ -26,8 +31,8 @@ func NewBatchExtractor(file *excelize.File, sheetName string) *BatchExtractor {
 	}
 }
 
-func (be *BatchExtractor) Extract() (map[types.BatchID]parser.CellLocation, error) {
-	dayRow, _, found := parser.FindCellInFirstColumn(be.file, be.sheetName, "day")
+func (be *BatchExtractor) Extract() (map[types.BatchID]CellLocation, error) {
+	dayRow, _, found := utils.FindCellInFirstColumn(be.file, be.sheetName, "day")
 	if !found {
 		return nil, fmt.Errorf("could not find 'day' cell in the first column")
 	}
@@ -41,7 +46,7 @@ func (be *BatchExtractor) Extract() (map[types.BatchID]parser.CellLocation, erro
 		return nil, fmt.Errorf("day row out of bounds")
 	}
 
-	batches := make(map[types.BatchID]parser.CellLocation)
+	batches := make(map[types.BatchID]CellLocation)
 	dayRowData := rows[dayRow]
 
 	for col := 0; col < len(dayRowData); col++ {
@@ -52,7 +57,7 @@ func (be *BatchExtractor) Extract() (map[types.BatchID]parser.CellLocation, erro
 
 		if batchRegex.MatchString(cellValue) {
 			normalized := normalizeBatchName(cellValue)
-			batches[types.BatchID(normalized)] = parser.CellLocation{
+			batches[types.BatchID(normalized)] = CellLocation{
 				Row: dayRow,
 				Col: col,
 			}
@@ -81,10 +86,10 @@ func normalizeBatchName(rawName string) string {
 	return rawName[:3] + strconv.Itoa(position)
 }
 
-func sortBatches(batches map[types.BatchID]parser.CellLocation) map[types.BatchID]parser.CellLocation {
+func sortBatches(batches map[types.BatchID]CellLocation) map[types.BatchID]CellLocation {
 	type batchEntry struct {
 		id       types.BatchID
-		location parser.CellLocation
+		location CellLocation
 	}
 
 	entries := make([]batchEntry, 0, len(batches))
@@ -101,7 +106,7 @@ func sortBatches(batches map[types.BatchID]parser.CellLocation) map[types.BatchI
 		return string(entries[i].id) < string(entries[j].id)
 	})
 
-	sorted := make(map[types.BatchID]parser.CellLocation, len(entries))
+	sorted := make(map[types.BatchID]CellLocation, len(entries))
 	for _, entry := range entries {
 		sorted[entry.id] = entry.location
 	}

@@ -1,7 +1,7 @@
-package readers
+package utils
 
 import "strings"
 
-func isValid(value string) bool {
+func IsValid(value string) bool {
 	return strings.TrimSpace(value) != ""
 }
