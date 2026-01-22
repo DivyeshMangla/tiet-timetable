@@ -7,6 +7,8 @@ import (
 
 	"github.com/DivyeshMangla/tiet-timetable/internal/config"
 	"github.com/DivyeshMangla/tiet-timetable/internal/io"
+	"github.com/DivyeshMangla/tiet-timetable/internal/parser"
+	"github.com/DivyeshMangla/tiet-timetable/internal/registry"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -34,7 +36,16 @@ func main() {
 	}
 	defer workbook.Close()
 
-	_ = workbook
+	p, err := parser.NewParser(workbook)
+	if err != nil {
+		log.Fatalf("Failed to create parser: %v", err)
+	}
+
+	reg := registry.NewTimetableRegistry()
+	if err := registry.PopulateFromParser(reg, p); err != nil {
+		log.Fatalf("Failed to populate registry: %v", err)
+	}
+
 	fmt.Println("Timetable loaded successfully")
 }
 
