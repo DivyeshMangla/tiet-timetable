@@ -1,9 +1,11 @@
 package model
 
+import "github.com/DivyeshMangla/tiet-timetable/internal/types"
+
 type ClassInfo struct {
-	SubjectCode string
+	SubjectCode types.SubjectCode
 	ClassType   ClassType
-	Room        string
-	Teacher     string
+	Room        types.Room
+	Teacher     types.Teacher
 	IsBlock     bool
 }

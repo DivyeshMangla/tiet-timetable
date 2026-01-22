@@ -8,6 +8,7 @@ import (
 	"slices"
 
 	"github.com/DivyeshMangla/tiet-timetable/internal/model"
+	"github.com/DivyeshMangla/tiet-timetable/internal/types"
 	"gopkg.in/yaml.v3"
 )
 
@@ -68,7 +69,11 @@ func (cl *ConfigLoader) Parse(in io.Reader) (*Config, error) {
 	}
 	subjects := make([]model.Subject, 0, len(root.Subjects))
 	for code, data := range root.Subjects {
-		subjects = append(subjects, model.NewSubject(code, data.Name, data.Abbreviation))
+		subjects = append(subjects, model.NewSubject(
+			types.SubjectCode(code),
+			types.SubjectName(data.Name),
+			types.SubjectAbbr(data.Abbreviation),
+		))
 	}
 	return &Config{
 		Subjects:     subjects,
