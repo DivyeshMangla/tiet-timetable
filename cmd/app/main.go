@@ -44,6 +44,7 @@ func main() {
 		log.Fatalf("Failed to create parser: %v", err)
 	}
 
+	fmt.Println("Populating registry...")
 	reg := registry.NewTimetableRegistry()
 	if err := registry.PopulateFromParser(reg, p); err != nil {
 		log.Fatalf("Failed to populate registry: %v", err)
