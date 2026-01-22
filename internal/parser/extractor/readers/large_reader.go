@@ -10,13 +10,23 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+const (
+	// minHorizontalMergeWidth is the minimum number of columns a merged region
+	// must span to be considered a "large class" (subject + room + teacher + spacing)
+	minHorizontalMergeWidth = 3
+)
+
 var teacherPattern = regexp.MustCompile(`^[A-Za-z. ]+$`)
 
 type LargeClassReader struct{}
 
 func (r *LargeClassReader) Matches(file *excelize.File, sheetName string, row, col int) bool {
 	region, found := utils.GetHorizontalMergedRegion(file, sheetName, row, col)
-	if !found || !isWideEnough(region) {
+	if !found {
+		return false
+	}
+
+	if !isWideEnough(region) {
 		return false
 	}
 
@@ -25,7 +35,7 @@ func (r *LargeClassReader) Matches(file *excelize.File, sheetName string, row, c
 		return false
 	}
 
-	parsed, ok := utils.ParseCode(utils.GetCellString(subjectValue))
+	parsed, ok := utils.ParseCode(utils.GetCellString(utils.FirstLine(subjectValue)))
 	if !ok {
 		return false
 	}
@@ -54,27 +64,28 @@ func (r *LargeClassReader) Read(file *excelize.File, sheetName string, row, col 
 		return nil
 	}
 
-	parsed, ok := utils.ParseCode(utils.GetCellString(classCodeValue))
+	parsed, ok := utils.ParseCode(utils.GetCellString(utils.FirstLine(classCodeValue)))
 	if !ok {
 		return nil
 	}
 
-	teacher := utils.GetCellString(teacherValue)
+	teacher := utils.GetCellString(utils.FirstLine(teacherValue))
 	if !isValidTeacher(teacher) {
 		return nil
 	}
 
+	room := utils.GetCellString(utils.FirstLine(roomValue))
 	return &model.ClassInfo{
 		SubjectCode: parsed.Code,
 		ClassType:   parsed.ClassType,
-		Room:        types.Room(utils.GetCellString(roomValue)),
+		Room:        types.Room(room),
 		Teacher:     types.Teacher(teacher),
 		IsBlock:     false,
 	}
 }
 
 func isWideEnough(region utils.MergedRegion) bool {
-	return (region.EndCol - region.StartCol) > 2
+	return (region.EndCol - region.StartCol) >= minHorizontalMergeWidth
 }
 
 func isValidTeacher(teacher string) bool {

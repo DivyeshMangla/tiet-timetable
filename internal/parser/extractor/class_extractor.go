@@ -6,6 +6,8 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+// ClassExtractor attempts to extract class information from a cell using
+// multiple reader strategies. Readers are tried in order until one matches.
 type ClassExtractor struct {
 	readers []readers.Reader
 }
@@ -26,6 +28,5 @@ func (ce *ClassExtractor) Extract(file *excelize.File, sheetName string, row, co
 			return reader.Read(file, sheetName, row, col)
 		}
 	}
-
 	return nil
 }

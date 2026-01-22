@@ -69,6 +69,8 @@ func FindCellToRightOfDay(file *excelize.File, sheetName string) (int, int, bool
 }
 
 func ToCellRef(row, col int) string {
+	// Convert 0-based row/col to Excel cell reference (e.g., row=0, col=0 -> A1)
+	// Note: excelize uses 1-based coordinates, so we add 1
 	colName := ""
 	colNum := col + 1
 	for colNum > 0 {

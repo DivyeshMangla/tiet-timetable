@@ -12,6 +12,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+// CellLocation represents a cell position in the Excel sheet (0-based coordinates)
 type CellLocation struct {
 	Row int
 	Col int
@@ -19,6 +20,8 @@ type CellLocation struct {
 
 var batchRegex = regexp.MustCompile(`^\d[A-Z]\d[A-Z]$`)
 
+// BatchExtractor extracts batch identifiers and their locations from a sheet.
+// Batches are found in the row containing "day" in the first column.
 type BatchExtractor struct {
 	file      *excelize.File
 	sheetName string
@@ -67,6 +70,7 @@ func (be *BatchExtractor) Extract() (map[types.BatchID]CellLocation, error) {
 	return sortBatches(batches), nil
 }
 
+// extractNumber extracts the numeric part from a batch name (e.g., "1A11" -> 1)
 func extractNumber(batchName string) int {
 	if len(batchName) < 3 {
 		return 0
@@ -75,6 +79,7 @@ func extractNumber(batchName string) int {
 	return num
 }
 
+// normalizeBatchName converts batch names like "1A1A" to "1A11" (letter to number)
 func normalizeBatchName(rawName string) string {
 	if len(rawName) != 4 {
 		return rawName
@@ -82,10 +87,10 @@ func normalizeBatchName(rawName string) string {
 
 	lastLetter := rawName[3]
 	position := int(lastLetter-'A') + 1
-
 	return rawName[:3] + strconv.Itoa(position)
 }
 
+// sortBatches sorts batches by their numeric component, then alphabetically
 func sortBatches(batches map[types.BatchID]CellLocation) map[types.BatchID]CellLocation {
 	type batchEntry struct {
 		id       types.BatchID

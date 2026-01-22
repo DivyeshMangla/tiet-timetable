@@ -68,14 +68,30 @@ func GetVerticalMergedRegion(file *excelize.File, sheetName string, row, col int
 }
 
 func GetHorizontalMergedRegion(file *excelize.File, sheetName string, row, col int) (MergedRegion, bool) {
-	regions, err := GetMergedRegions(file, sheetName)
+
+	mergeCells, err := file.GetMergeCells(sheetName)
 	if err != nil {
 		return MergedRegion{}, false
 	}
 
-	for _, region := range regions {
-		if region.IsHorizontal() && region.IsInRange(row, col) {
-			return region, true
+	r := row + 1
+	c := col + 1
+
+	for _, mc := range mergeCells {
+		startCol, startRow, _ := excelize.CellNameToCoordinates(mc.GetStartAxis())
+		endCol, endRow, _ := excelize.CellNameToCoordinates(mc.GetEndAxis())
+
+		// horizontal merge = spans columns, not rows
+		if startRow == endRow &&
+			r == startRow &&
+			c >= startCol && c <= endCol {
+
+			return MergedRegion{
+				StartRow: startRow - 1,
+				EndRow:   endRow - 1,
+				StartCol: startCol - 1,
+				EndCol:   endCol - 1,
+			}, true
 		}
 	}
 

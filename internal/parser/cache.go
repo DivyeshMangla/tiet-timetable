@@ -7,6 +7,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+// Cache stores pre-computed batch locations and day slots for all sheets
 type Cache struct {
 	batches  map[types.SheetID]map[types.BatchID]extractor.CellLocation
 	daySlots map[types.SheetID][]DaySlots

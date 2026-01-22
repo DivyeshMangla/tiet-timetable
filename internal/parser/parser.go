@@ -3,7 +3,6 @@ package parser
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/DivyeshMangla/tiet-timetable/internal/model"
 	"github.com/DivyeshMangla/tiet-timetable/internal/parser/extractor"
@@ -19,20 +18,10 @@ type Parser struct {
 }
 
 func NewParser(file *excelize.File) (*Parser, error) {
-	start := time.Now()
-
 	cache, err := FromWorkbook(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build cache: %w", err)
 	}
-
-	totalBatches := 0
-	for _, batches := range cache.batches {
-		totalBatches += len(batches)
-	}
-
-	fmt.Printf("Parsed %d sheets with %d batches in %.2fms\n",
-		len(cache.batches), totalBatches, float64(time.Since(start).Nanoseconds())/1e6)
 
 	return &Parser{
 		cache:          cache,
@@ -121,14 +110,9 @@ func (p *Parser) processTimeSlot(
 		return
 	}
 
-	region, found := utils.GetVerticalMergedRegion(p.file, sheetName, row, batchCol)
-	isBlock := found && region.StartRow != region.EndRow
-
-	if isBlock {
-		p.processBlockClass(region, row, daySlots, *classInfo, entries)
-		return
-	}
-
+	// Block classes are identified by BlockClassReader and marked with IsBlock=true.
+	// They may or may not have vertical merges. Currently, we add them as single entries.
+	// If vertical merge expansion is needed in the future, it can be handled here.
 	*entries = append(*entries, model.TimetableEntry{
 		Day:       daySlots.Day,
 		TimeSlot:  timeSlot,
@@ -136,6 +120,9 @@ func (p *Parser) processTimeSlot(
 	})
 }
 
+// processBlockClass expands a block class across multiple time slots.
+// A block class spans multiple consecutive time slots (indicated by a vertical merge).
+// This function creates an entry for each time slot within the merged region.
 func (p *Parser) processBlockClass(
 	region utils.MergedRegion,
 	currentRow int,
@@ -143,10 +130,12 @@ func (p *Parser) processBlockClass(
 	classInfo model.ClassInfo,
 	entries *[]model.TimetableEntry,
 ) {
+	// Only process from the start of the merged region to avoid duplicates
 	if currentRow != region.StartRow {
 		return
 	}
 
+	// Create entries for all time slots within the merged region
 	for slot, loc := range daySlots.Slots {
 		if loc.Row >= region.StartRow && loc.Row <= region.EndRow {
 			*entries = append(*entries, model.TimetableEntry{

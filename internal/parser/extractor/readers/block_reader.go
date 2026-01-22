@@ -2,7 +2,6 @@ package readers
 
 import (
 	"github.com/DivyeshMangla/tiet-timetable/internal/model"
-	"github.com/DivyeshMangla/tiet-timetable/internal/parser/utils"
 	"github.com/DivyeshMangla/tiet-timetable/internal/types"
 	"github.com/xuri/excelize/v2"
 )
@@ -10,68 +9,55 @@ import (
 type BlockClassReader struct{}
 
 func (r *BlockClassReader) Matches(file *excelize.File, sheetName string, row, col int) bool {
-	subjectValue, err := utils.GetCell(file, sheetName, row, col)
-	if err != nil || !utils.IsValid(subjectValue) {
+	// Subject must exist and be a valid subject code
+	subject := getValidCell(file, sheetName, row, col)
+	if subject == "" {
+		return false
+	}
+	if _, ok := parseSubject(subject); !ok {
 		return false
 	}
 
-	parsed, ok := utils.ParseCode(utils.GetCellString(subjectValue))
-	if !ok || !utils.IsSubjectCode(string(parsed.Code)) {
+	// Room must exist immediately below
+	if getValidCell(file, sheetName, row+1, col) == "" {
 		return false
 	}
 
-	roomValue, err := utils.GetCell(file, sheetName, row+1, col)
-	if err != nil || !utils.IsValid(roomValue) {
-		return false
-	}
-
-	row2Value, _ := utils.GetCell(file, sheetName, row+2, col)
-	row3Value, _ := utils.GetCell(file, sheetName, row+3, col)
-
-	if utils.IsValid(row2Value) && utils.IsValid(row3Value) {
-		return true
-	}
-
-	return utils.IsValid(row2Value) && !utils.IsValid(row3Value)
+	// At least one continuation row must exist (block indicator)
+	return getValidCell(file, sheetName, row+2, col) != "" ||
+		getValidCell(file, sheetName, row+3, col) != ""
 }
 
 func (r *BlockClassReader) Read(file *excelize.File, sheetName string, row, col int) *model.ClassInfo {
-	subjectValue, err := utils.GetCell(file, sheetName, row, col)
-	if err != nil || !utils.IsValid(subjectValue) {
+	subject := getValidCell(file, sheetName, row, col)
+	if subject == "" {
 		return nil
 	}
 
-	parsed, ok := utils.ParseCode(utils.GetCellString(subjectValue))
+	parsed, ok := parseSubject(subject)
 	if !ok {
 		return nil
 	}
 
-	roomValue, err := utils.GetCell(file, sheetName, row+1, col)
-	if err != nil || !utils.IsValid(roomValue) {
+	room := getValidCell(file, sheetName, row+1, col)
+	if room == "" {
 		return nil
 	}
 
-	room := utils.GetCellString(roomValue)
-
-	teacherValue, err := utils.GetCell(file, sheetName, row+3, col)
-	if err != nil || !utils.IsValid(teacherValue) {
-		teacherValue, err = utils.GetCell(file, sheetName, row+2, col)
-		if err != nil {
-			return nil
-		}
+	// Prefer teacher from row+3, fallback to row+2
+	teacher := getValidCell(file, sheetName, row+3, col)
+	if teacher == "" {
+		teacher = getValidCell(file, sheetName, row+2, col)
 	}
-
-	if !utils.IsValid(teacherValue) {
+	if teacher == "" {
 		return nil
 	}
-
-	teacher := utils.GetCellString(teacherValue)
 
 	return &model.ClassInfo{
 		SubjectCode: parsed.Code,
 		ClassType:   parsed.ClassType,
-		Room:        types.Room(room),
-		Teacher:     types.Teacher(teacher),
+		Room:        types.Room(cleanCell(room)),
+		Teacher:     types.Teacher(cleanCell(teacher)),
 		IsBlock:     true,
 	}
 }

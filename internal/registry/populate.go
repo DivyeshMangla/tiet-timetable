@@ -32,9 +32,7 @@ func PopulateFromParser(reg *TimetableRegistry, p *parser.Parser) error {
 			elapsed := time.Since(start)
 			entryCount := len(timetable.Entries)
 
-			fmt.Printf("Loaded timetable for batch %s (%d entries) in %.2fms\n",
-				batchID, entryCount, float64(elapsed.Nanoseconds())/1e6)
-
+			fmt.Printf("Loaded timetable for batch %s (%d entries) in %.2fms\n", batchID, entryCount, float64(elapsed.Nanoseconds())/1e6)
 			reg.RegisterBatch(sheetID, batchID, timetable)
 			totalBatches++
 		}
