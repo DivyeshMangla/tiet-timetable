@@ -7,16 +7,10 @@ import (
 	"net/http"
 )
 
-// Download downloads content from the given URL and returns it as an io.ReadCloser.
-// It uses an insecure TLS configuration to work around certificate issues (e.g., thapar.edu).
-// WARNING: This is insecure and only used as a workaround for certificate issues.
 func Download(url string) (io.ReadCloser, error) {
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-
 	client := &http.Client{
 		Transport: tr,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -38,6 +32,5 @@ func Download(url string) (io.ReadCloser, error) {
 		_ = resp.Body.Close()
 		return nil, fmt.Errorf("HTTP %d for %s", resp.StatusCode, url)
 	}
-
 	return resp.Body, nil
 }

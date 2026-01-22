@@ -8,7 +8,7 @@ type Subject struct {
 
 func NewSubject(code, name, abbr string) Subject {
 	if abbr == "" {
-		abbr = name // Default to name if abbreviation is empty
+		abbr = name
 	}
 
 	return Subject{
