@@ -1,11 +1,12 @@
 package registry
 
 import (
+	"fmt"
+
 	"github.com/DivyeshMangla/tiet-timetable/internal/parser"
-	"github.com/DivyeshMangla/tiet-timetable/internal/types"
 )
 
-func PopulateFromParser(reg *TimetableRegistry, p *parser.Parser) {
+func PopulateFromParser(reg *TimetableRegistry, p *parser.Parser) error {
 	sheetNames := p.SheetNames()
 
 	for _, sheetName := range sheetNames {
@@ -20,9 +21,14 @@ func PopulateFromParser(reg *TimetableRegistry, p *parser.Parser) {
 		}
 
 		for _, batchID := range batchNames {
-			reg.RegisterBatchMetadata(sheetID, batchID)
+			timetable, err := p.GetTimetable(sheetName, string(batchID))
+			if err != nil {
+				return fmt.Errorf("failed to get timetable for sheet %q batch %q: %w", sheetName, batchID, err)
+			}
+
+			reg.RegisterBatch(sheetID, batchID, timetable)
 		}
 	}
 
-	reg.parser = p
+	return nil
 }
