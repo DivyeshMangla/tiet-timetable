@@ -1,6 +1,5 @@
 # IntelliJ IDEA
 .idea/
-/.idea/
 *.iml
 *.iws
 *.ipr
@@ -12,6 +11,12 @@ build/
 
 # Gradle
 .gradle/
+
+# Go build output
+bin/
+*.exe
+*.test
+*.out
 
 # Logs
 *.log
@@ -28,10 +33,11 @@ Thumbs.db
 # Environment / secrets
 .env
 
-# Excel input/output
+# Excel files (ignore except test fixtures)
 *.xlsx
 *.xls
+!testdata/**/*.xlsx
+!testdata/**/*.xls
 
-# Temporary code file
-/TempCode.txt
-/out.png
+# Temporary code files
+out.png
