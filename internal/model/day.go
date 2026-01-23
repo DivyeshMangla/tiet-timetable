@@ -8,7 +8,6 @@ const (
 	WED
 	THU
 	FRI
-	SAT
 )
 
 func (d Day) String() string {
@@ -23,8 +22,6 @@ func (d Day) String() string {
 		return "THU"
 	case FRI:
 		return "FRI"
-	case SAT:
-		return "SAT"
 	default:
 		return "UNKNOWN"
 	}
