@@ -36,7 +36,6 @@ func newDaySlotsFactory() *daySlotsFactory {
 }
 
 func (f *daySlotsFactory) processSlot(slotNumber int, cell CellLocation) {
-	// Day boundary: seeing 1 after slots already collected
 	if slotNumber == 1 && len(f.currentSlots) > 0 {
 		f.finalizeCurrentDay()
 	}
@@ -77,26 +76,15 @@ func (f *daySlotsFactory) build() []DaySlots {
 	return f.result
 }
 
-const (
-	// maxRowsToScan is the maximum number of rows to scan when building day slots
-	// This prevents infinite loops on malformed sheets
-	maxRowsToScan = 300
-)
+const maxRowsToScan = 300
 
-func BuildDaySlotsFromSheet(
-	file *excelize.File,
-	sheetName string,
-	firstSlotRow,
-	firstSlotCol int,
-) ([]DaySlots, error) {
-
+func BuildDaySlotsFromSheet(file *excelize.File, sheetName string, firstSlotRow, firstSlotCol int) ([]DaySlots, error) {
 	if file == nil || firstSlotRow < 0 || firstSlotCol < 0 {
 		return nil, nil
 	}
 
 	factory := newDaySlotsFactory()
 	maxRows := firstSlotRow + maxRowsToScan
-
 	lastSlotNumber := -1
 
 	for row := firstSlotRow; row <= maxRows && !factory.isComplete(); row++ {
@@ -111,7 +99,6 @@ func BuildDaySlotsFromSheet(
 			continue
 		}
 
-		// Skip duplicate rows from merged cells
 		if slotNumber == lastSlotNumber {
 			continue
 		}
