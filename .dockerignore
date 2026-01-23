@@ -1,16 +1,25 @@
+# Build artifacts
 build/
-.gradle/
 out/
+*.log
+*.tmp
+
+# IDEs
 .idea/
 .vscode/
 *.iml
+
+# VCS
 .git/
 .gitignore
 .gitattributes
-*.md
-!README.md
+
+# OS
 .DS_Store
-*.log
-*.tmp
+
+# Env / secrets
 .env
 
+# Docs
+*.md
+!README.md

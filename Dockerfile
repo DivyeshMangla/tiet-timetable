@@ -1,49 +1,23 @@
-# Build stage
-FROM eclipse-temurin:21-jdk-jammy AS build
+FROM golang:1.22-jammy AS build
 
 WORKDIR /app
 
-# Copy Gradle wrapper and build files first for better caching
-COPY gradle/ ./gradle/
-COPY gradlew ./
-COPY gradlew.bat ./
-COPY build.gradle.kts settings.gradle.kts ./
+COPY go.mod go.sum ./
+RUN go mod download
 
-# Make gradlew executable
-RUN chmod +x ./gradlew
+COPY . .
 
-# Download dependencies (cached layer)
-RUN ./gradlew dependencies --no-daemon || true
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -o app
 
-# Copy source code
-COPY src/ ./src/
-
-# Build the application
-RUN ./gradlew bootJar --no-daemon
-
-# Runtime stage - use JRE for minimal size
-FROM eclipse-temurin:21-jre-jammy
+FROM gcr.io/distroless/base-debian12
 
 WORKDIR /app
 
-# Create non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+USER nonroot:nonroot
 
-# Copy only the built JAR from build stage
-COPY --from=build /app/build/libs/*.jar app.jar
-
-# Set ownership
-RUN chown -R appuser:appuser /app
-
-USER appuser
+COPY --from=build /app/app /app/app
 
 EXPOSE 8080
 
-# JVM optimizations for containerized environments
-ENTRYPOINT ["java", \
-    "-XX:+UseContainerSupport", \
-    "-XX:MaxRAMPercentage=75.0", \
-    "-XX:+UseG1GC", \
-    "-Djava.security.egd=file:/dev/./urandom", \
-    "-jar", "app.jar"]
-
+ENTRYPOINT ["/app/app"]
