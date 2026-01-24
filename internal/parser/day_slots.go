@@ -25,7 +25,7 @@ type daySlotsFactory struct {
 }
 
 var weekdays = []model.Day{
-	model.MON, model.TUE, model.WED, model.THU, model.FRI, model.SAT,
+	model.MON, model.TUE, model.WED, model.THU, model.FRI,
 }
 
 func newDaySlotsFactory() *daySlotsFactory {
