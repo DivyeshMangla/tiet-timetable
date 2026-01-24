@@ -8,7 +8,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-var subjectCodePattern = regexp.MustCompile(`^[A-Z]{3}\d{3}$`)
+var subjectCodePattern = regexp.MustCompile(`^([A-Z]{3}\d{3}|[A-Z]{5}\d)$`)
 
 func GetCell(file *excelize.File, sheetName string, row, col int) (string, error) {
 	cellRef := ToCellRef(row, col)

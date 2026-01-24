@@ -19,6 +19,7 @@ func NewClassExtractor() *ClassExtractor {
 			&readers.LargeClassReader{},
 			&readers.BlockClassReader{},
 			&readers.AlternatingLargeClassReader{},
+			&readers.LargeBlockClassReader{},
 		},
 	}
 }
