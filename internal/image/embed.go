@@ -5,11 +5,12 @@ import (
 	"io"
 )
 
-//go:embed timetable-bg.png
+//go:embed timetable-bg.png Inter-SemiBold.ttf
 var FS embed.FS
 
 const (
 	Background = "timetable-bg.png"
+	FontFile   = "Inter-SemiBold.ttf"
 )
 
 func GetBackground(name string) (io.ReadCloser, error) {
@@ -18,4 +19,8 @@ func GetBackground(name string) (io.ReadCloser, error) {
 		return nil, err
 	}
 	return file, nil
+}
+
+func GetFont(name string) ([]byte, error) {
+	return FS.ReadFile(name)
 }

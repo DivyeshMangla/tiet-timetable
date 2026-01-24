@@ -16,7 +16,7 @@ type Bounds struct {
 
 var ScheduleGrid = GridBounds{
 	YBounds: []Bounds{
-		{Start: 735, End: 915},
+		{Start: 735, End: 916},
 		{Start: 944, End: 1115},
 		{Start: 1144, End: 1323},
 		{Start: 1352, End: 1523},
@@ -31,7 +31,7 @@ var ScheduleGrid = GridBounds{
 
 	XBounds: []Bounds{
 		{Start: 928, End: 1631},
-		{Start: 1664, End: 2371},
+		{Start: 1662, End: 2371},
 		{Start: 2400, End: 3107},
 		{Start: 3136, End: 3847},
 		{Start: 3876, End: 4579},
