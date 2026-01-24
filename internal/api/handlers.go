@@ -2,7 +2,10 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/DivyeshMangla/tiet-timetable/internal/image"
 	"net/http"
+	"os"
 
 	"github.com/DivyeshMangla/tiet-timetable/internal/registry"
 	"github.com/DivyeshMangla/tiet-timetable/internal/types"
@@ -78,14 +81,36 @@ func (h *Handler) GetTimetablePNG(w http.ResponseWriter, r *http.Request) {
 	}
 
 	batchID := types.BatchID(batchName)
-	_, ok := h.registry.GetTimetable(batchID)
+	timetable, ok := h.registry.GetTimetable(batchID)
 	if !ok {
 		writeError(w, http.StatusNotFound, "timetable not found")
 		return
 	}
 
-	// TODO: Implement PNG generation
-	writeError(w, http.StatusNotImplemented, "PNG generation not yet implemented")
+	drawer, err := image.NewTimetableDrawer()
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to create timetable drawer")
+		return
+	}
+
+	tmpFile, err := os.CreateTemp("", fmt.Sprintf("%s_%s_*.png", sheetName, batchName))
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to create temp file")
+		return
+	}
+	outputPath := tmpFile.Name()
+	tmpFile.Close()
+
+	defer os.Remove(outputPath)
+
+	err = drawer.DrawTimetable(timetable.Entries, outputPath)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to generate timetable image")
+		return
+	}
+
+	w.Header().Set("Content-Type", "image/png")
+	http.ServeFile(w, r, outputPath)
 }
 
 func writeJSON(w http.ResponseWriter, status int, data interface{}) {
