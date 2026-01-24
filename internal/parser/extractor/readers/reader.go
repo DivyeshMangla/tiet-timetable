@@ -6,6 +6,5 @@ import (
 )
 
 type Reader interface {
-	Matches(file *excelize.File, sheetName string, row, col int) bool
-	Read(file *excelize.File, sheetName string, row, col int) *model.ClassInfo
+	Read(file *excelize.File, sheetName string, row, col int) (bool, *model.ClassInfo)
 }

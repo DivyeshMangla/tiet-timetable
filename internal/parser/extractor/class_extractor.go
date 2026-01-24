@@ -24,8 +24,8 @@ func NewClassExtractor() *ClassExtractor {
 
 func (ce *ClassExtractor) Extract(file *excelize.File, sheetName string, row, col int) *model.ClassInfo {
 	for _, reader := range ce.readers {
-		if reader.Matches(file, sheetName, row, col) {
-			return reader.Read(file, sheetName, row, col)
+		if matched, classInfo := reader.Read(file, sheetName, row, col); matched {
+			return classInfo
 		}
 	}
 	return nil

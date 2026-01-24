@@ -8,40 +8,27 @@ import (
 
 type BlockClassReader struct{}
 
-func (r *BlockClassReader) Matches(file *excelize.File, sheetName string, row, col int) bool {
-	// Subject must exist and be a valid subject code
+func (r *BlockClassReader) Read(file *excelize.File, sheetName string, row, col int) (bool, *model.ClassInfo) {
 	subject := getValidCell(file, sheetName, row, col)
 	if subject == "" {
-		return false
-	}
-	if _, ok := parseSubject(subject); !ok {
-		return false
-	}
-
-	// Room must exist immediately below
-	if getValidCell(file, sheetName, row+1, col) == "" {
-		return false
-	}
-
-	// At least one continuation row must exist (block indicator)
-	return getValidCell(file, sheetName, row+2, col) != "" ||
-		getValidCell(file, sheetName, row+3, col) != ""
-}
-
-func (r *BlockClassReader) Read(file *excelize.File, sheetName string, row, col int) *model.ClassInfo {
-	subject := getValidCell(file, sheetName, row, col)
-	if subject == "" {
-		return nil
+		return false, nil
 	}
 
 	parsed, ok := parseSubject(subject)
 	if !ok {
-		return nil
+		return false, nil
 	}
 
 	room := getValidCell(file, sheetName, row+1, col)
 	if room == "" {
-		return nil
+		return false, nil
+	}
+
+	// Check for continuation rows to identify block class
+	hasContinuation := getValidCell(file, sheetName, row+2, col) != "" ||
+		getValidCell(file, sheetName, row+3, col) != ""
+	if !hasContinuation {
+		return false, nil
 	}
 
 	// Prefer teacher from row+3, fallback to row+2
@@ -50,10 +37,10 @@ func (r *BlockClassReader) Read(file *excelize.File, sheetName string, row, col 
 		teacher = getValidCell(file, sheetName, row+2, col)
 	}
 	if teacher == "" {
-		return nil
+		return false, nil
 	}
 
-	return &model.ClassInfo{
+	return true, &model.ClassInfo{
 		SubjectCode: parsed.Code,
 		ClassType:   parsed.ClassType,
 		Room:        types.Room(cleanCell(room)),
