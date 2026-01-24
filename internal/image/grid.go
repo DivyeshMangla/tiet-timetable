@@ -60,3 +60,15 @@ func GetCell(timeSlot model.TimeSlot, day model.Day) Cell {
 		Height: yBound.End - yBound.Start,
 	}
 }
+
+func GetMergedCell(timeSlot model.TimeSlot, day model.Day) Cell {
+	yBound := ScheduleGrid.YBounds[timeSlot]
+	xBound := ScheduleGrid.XBounds[day]
+
+	return Cell{
+		X:      xBound.Start,
+		Y:      yBound.Start,
+		Width:  xBound.End - xBound.Start,
+		Height: ScheduleGrid.YBounds[timeSlot+1].End - yBound.Start,
+	}
+}

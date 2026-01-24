@@ -90,7 +90,7 @@ func (cf *CapsuleFiller) FillCell(timeSlot model.TimeSlot, day model.Day, fillCo
 	}
 }
 
-func (cf *CapsuleFiller) FillCellWithText(timeSlot model.TimeSlot, day model.Day, fillColor color.RGBA, text string, textColor color.RGBA) error {
+func (cf *CapsuleFiller) FillCellWithText(timeSlot model.TimeSlot, day model.Day, fillColor color.RGBA, text string) error {
 	cf.FillCell(timeSlot, day, fillColor)
 
 	cell := GetCell(timeSlot, day)
@@ -101,7 +101,7 @@ func (cf *CapsuleFiller) FillCellWithText(timeSlot model.TimeSlot, day model.Day
 	c.SetFontSize(DefaultFontSize)
 	c.SetClip(cf.img.Bounds())
 	c.SetDst(cf.img)
-	c.SetSrc(image.NewUniform(textColor))
+	c.SetSrc(image.NewUniform(TextColor))
 	c.SetHinting(font.HintingFull)
 
 	face := truetype.NewFace(cf.font, &truetype.Options{
