@@ -13,15 +13,8 @@ import (
 )
 
 const (
-	BackgroundColorHex = "191816"
-	CellColorHex       = "FFFBF0"
-	ColorTolerance     = 10
-	DefaultFontSize    = 53.0
-)
-
-var (
-	BackgroundColor = HexToRGBA(BackgroundColorHex)
-	CellColor       = HexToRGBA(CellColorHex)
+	ColorTolerance  = 10
+	DefaultFontSize = 53.0
 )
 
 type CapsuleFiller struct {
