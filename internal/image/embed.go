@@ -5,12 +5,11 @@ import (
 	"io"
 )
 
-//go:embed timetable-bg-white.png timetable-bg.png
+//go:embed timetable-bg.png
 var FS embed.FS
 
 const (
-	BackgroundWhite = "timetable-bg-white.png"
-	Background      = "timetable-bg.png"
+	Background = "timetable-bg.png"
 )
 
 func GetBackground(name string) (io.ReadCloser, error) {
