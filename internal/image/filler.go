@@ -10,13 +10,11 @@ import (
 )
 
 const (
-	BackgroundColorR = 22
-	BackgroundColorG = 24
-	BackgroundColorB = 25
-	ColorTolerance   = 10
+	BackgroundColorHex = "191816"
+	ColorTolerance     = 10
 )
 
-var BackgroundColor = color.RGBA{R: BackgroundColorR, G: BackgroundColorG, B: BackgroundColorB, A: 255}
+var BackgroundColor = HexToRGBA(BackgroundColorHex)
 
 type CapsuleFiller struct {
 	img *image.RGBA
@@ -65,9 +63,9 @@ func (cf *CapsuleFiller) FillCell(timeSlot model.TimeSlot, day model.Day, fillCo
 }
 
 func isBackgroundColor(c color.RGBA) bool {
-	return abs(c.R, BackgroundColorR) <= ColorTolerance &&
-		abs(c.G, BackgroundColorG) <= ColorTolerance &&
-		abs(c.B, BackgroundColorB) <= ColorTolerance
+	return abs(c.R, BackgroundColor.R) <= ColorTolerance &&
+		abs(c.G, BackgroundColor.G) <= ColorTolerance &&
+		abs(c.B, BackgroundColor.B) <= ColorTolerance
 }
 
 func abs(a, b uint8) uint8 {
