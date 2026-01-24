@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/DivyeshMangla/tiet-timetable/internal/api"
 	"github.com/DivyeshMangla/tiet-timetable/internal/config"
@@ -37,6 +38,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to load workbook: %v", err)
 	}
+	if err := TrimSheetNames(workbook); err != nil {
+		log.Fatalf("Failed to trim sheet names: %v", err)
+	}
+
 	defer workbook.Close()
 
 	p, err := parser.NewParser(workbook)
@@ -70,4 +75,27 @@ func loadFromURL(url string) (*excelize.File, error) {
 		return nil, fmt.Errorf("failed to open workbook: %w", err)
 	}
 	return workbook, nil
+}
+
+func TrimSheetNames(file *excelize.File) error {
+	sheetList := file.GetSheetList()
+
+	for _, oldName := range sheetList {
+		visible, err := file.GetSheetVisible(oldName)
+		if err != nil {
+			return err
+		}
+		if !visible {
+			continue
+		}
+
+		newName := strings.TrimSpace(oldName)
+		if newName != oldName {
+			if err := file.SetSheetName(oldName, newName); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
