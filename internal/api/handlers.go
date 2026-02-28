@@ -55,7 +55,7 @@ func (h *Handler) GetBatches(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) GetAllBatches(w http.ResponseWriter, r *http.Request) {
 	batches := h.registry.AllBatches()
 	batchNames := make([]string, 0, len(batches))
-	for batchID := range batches {
+	for _, batchID := range batches {
 		batchNames = append(batchNames, string(batchID))
 	}
 
