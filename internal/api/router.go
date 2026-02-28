@@ -12,6 +12,7 @@ func SetupRoutes(reg *registry.TimetableRegistry) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /api/timetable/sheets", handler.GetSheets)
+	mux.HandleFunc("GET /api/timetable/batches", handler.GetAllBatches)
 	mux.HandleFunc("GET /api/timetable/sheets/{sheetName}/batches", handler.GetBatches)
 	mux.HandleFunc("GET /api/timetable/sheets/{sheetName}/batches/{batchName}", handler.GetTimetable)
 	mux.HandleFunc("GET /api/timetable/sheets/{sheetName}/batches/{batchName}/png", handler.GetTimetablePNG)

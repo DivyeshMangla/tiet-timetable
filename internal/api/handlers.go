@@ -52,6 +52,16 @@ func (h *Handler) GetBatches(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, batchNames)
 }
 
+func (h *Handler) GetAllBatches(w http.ResponseWriter, r *http.Request) {
+	batches := h.registry.AllBatches()
+	batchNames := make([]string, 0, len(batches))
+	for batchID := range batches {
+		batchNames = append(batchNames, string(batchID))
+	}
+
+	writeJSON(w, http.StatusOK, batchNames)
+}
+
 func (h *Handler) GetTimetable(w http.ResponseWriter, r *http.Request) {
 	sheetName := r.PathValue("sheetName")
 	batchName := r.PathValue("batchName")

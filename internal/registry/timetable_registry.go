@@ -53,3 +53,11 @@ func (tr *TimetableRegistry) BatchIDs(sheetID types.SheetID) []types.BatchID {
 	}
 	return ids
 }
+
+func (tr *TimetableRegistry) AllBatches() []types.BatchID {
+	batches := make([]types.BatchID, 0, len(tr.batchToTimetable))
+	for batchID := range tr.batchToTimetable {
+		batches = append(batches, batchID)
+	}
+	return batches
+}
