@@ -16,7 +16,6 @@ import (
 )
 
 const configFile = "config.yml"
-const serverPort = ":8080"
 
 func main() {
 	loader := config.NewConfigLoader(configFile)
@@ -55,10 +54,15 @@ func main() {
 		log.Fatalf("Failed to populate registry: %v", err)
 	}
 
-	router := api.SetupRoutes(reg)
+	router := api.SetupRoutes(reg, "frontend/dist")
 
-	fmt.Printf("Server starting on http://localhost%s\n", serverPort)
-	if err := http.ListenAndServe(serverPort, router); err != nil {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	fmt.Printf("Server starting on http://localhost:%s\n", port)
+	if err := http.ListenAndServe(":"+port, router); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
 }

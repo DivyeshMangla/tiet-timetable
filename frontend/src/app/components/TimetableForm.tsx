@@ -32,8 +32,11 @@ export function TimetableForm({ batch, setBatch, subjects, setSubjects }: Timeta
   const [editingSubjectCode, setEditingSubjectCode] = useState<string | null>(null);
   const [editingAlias, setEditingAlias] = useState('');
 
-  // Fetch batch options from backend
+  // Fetch batch options from backend (retries every 10s if backend isn't ready)
   useEffect(() => {
+    let retryTimeout: ReturnType<typeof setTimeout>;
+    let cancelled = false;
+
     const fetchBatches = async () => {
       try {
         const cached = localStorage.getItem('cached_batches');
@@ -55,17 +58,22 @@ export function TimetableForm({ batch, setBatch, subjects, setSubjects }: Timeta
         localStorage.setItem('cached_batches', JSON.stringify(data.batches));
         setLoadingBatches(false);
       } catch (error) {
-        console.error('Error fetching batches:', error);
-        setBatchOptions([]);
-        setLoadingBatches(false);
+        console.error('Error fetching batches, retrying in 10s...', error);
+        if (!cancelled) {
+          retryTimeout = setTimeout(fetchBatches, 10000);
+        }
       }
     };
 
     fetchBatches();
+    return () => { cancelled = true; clearTimeout(retryTimeout); };
   }, []);
 
-  // Fetch subjects from backend
+  // Fetch subjects from backend (retries every 10s if backend isn't ready)
   useEffect(() => {
+    let retryTimeout: ReturnType<typeof setTimeout>;
+    let cancelled = false;
+
     const fetchSubjects = async () => {
       try {
         const cached = localStorage.getItem('cached_subjects');
@@ -87,13 +95,15 @@ export function TimetableForm({ batch, setBatch, subjects, setSubjects }: Timeta
         localStorage.setItem('cached_subjects', JSON.stringify(data.subjects));
         setLoadingSubjects(false);
       } catch (error) {
-        console.error('Error fetching subjects:', error);
-        setAvailableSubjects([]);
-        setLoadingSubjects(false);
+        console.error('Error fetching subjects, retrying in 10s...', error);
+        if (!cancelled) {
+          retryTimeout = setTimeout(fetchSubjects, 10000);
+        }
       }
     };
 
     fetchSubjects();
+    return () => { cancelled = true; clearTimeout(retryTimeout); };
   }, []);
 
   const filteredSubjects = availableSubjects.filter(

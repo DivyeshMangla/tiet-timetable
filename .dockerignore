@@ -23,3 +23,7 @@ out/
 # Docs
 *.md
 !README.md
+
+# Frontend build artifacts (built inside Docker)
+frontend/node_modules/
+frontend/dist/
