@@ -41,3 +41,18 @@ Thumbs.db
 
 # Temporary code files
 out.png
+
+# Node / NPM
+node_modules/
+npm-debug.log*
+
+# Vite
+frontend/dist/
+frontend/.vite/
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment (local)
+.env.local
+.env.*.local

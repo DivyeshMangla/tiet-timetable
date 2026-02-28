@@ -61,3 +61,33 @@ func (tr *TimetableRegistry) AllBatches() []types.BatchID {
 	}
 	return batches
 }
+
+func (tr *TimetableRegistry) AllSubjects() []types.SubjectCode {
+	seen := make(map[types.SubjectCode]struct{})
+	for _, timetable := range tr.batchToTimetable {
+		for _, entry := range timetable.Entries {
+			seen[entry.ClassInfo.SubjectCode] = struct{}{}
+		}
+	}
+	subjects := make([]types.SubjectCode, 0, len(seen))
+	for code := range seen {
+		subjects = append(subjects, code)
+	}
+	return subjects
+}
+
+func (tr *TimetableRegistry) BatchSubjects(batchID types.BatchID) ([]types.SubjectCode, bool) {
+	timetable, ok := tr.batchToTimetable[batchID]
+	if !ok {
+		return nil, false
+	}
+	seen := make(map[types.SubjectCode]struct{})
+	for _, entry := range timetable.Entries {
+		seen[entry.ClassInfo.SubjectCode] = struct{}{}
+	}
+	subjects := make([]types.SubjectCode, 0, len(seen))
+	for code := range seen {
+		subjects = append(subjects, code)
+	}
+	return subjects, true
+}

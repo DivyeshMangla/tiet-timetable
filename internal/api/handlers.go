@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/DivyeshMangla/tiet-timetable/internal/image"
+	"github.com/DivyeshMangla/tiet-timetable/internal/model"
 	"net/http"
 	"os"
 
@@ -59,7 +60,36 @@ func (h *Handler) GetAllBatches(w http.ResponseWriter, r *http.Request) {
 		batchNames = append(batchNames, string(batchID))
 	}
 
-	writeJSON(w, http.StatusOK, batchNames)
+	writeJSON(w, http.StatusOK, map[string]interface{}{"batches": batchNames})
+}
+
+func (h *Handler) GetSubjects(w http.ResponseWriter, r *http.Request) {
+	subjects := h.registry.AllSubjects()
+	codes := make([]string, 0, len(subjects))
+	for _, code := range subjects {
+		codes = append(codes, string(code))
+	}
+	writeJSON(w, http.StatusOK, map[string]interface{}{"subjects": codes})
+}
+
+func (h *Handler) GetBatchSubjects(w http.ResponseWriter, r *http.Request) {
+	batchName := r.PathValue("batchName")
+	if batchName == "" {
+		writeError(w, http.StatusBadRequest, "batch name is required")
+		return
+	}
+
+	subjects, ok := h.registry.BatchSubjects(types.BatchID(batchName))
+	if !ok {
+		writeError(w, http.StatusNotFound, "batch not found")
+		return
+	}
+
+	codes := make([]string, 0, len(subjects))
+	for _, code := range subjects {
+		codes = append(codes, string(code))
+	}
+	writeJSON(w, http.StatusOK, map[string]interface{}{"subjects": codes})
 }
 
 func (h *Handler) GetTimetable(w http.ResponseWriter, r *http.Request) {
@@ -114,6 +144,75 @@ func (h *Handler) GetTimetablePNG(w http.ResponseWriter, r *http.Request) {
 	defer os.Remove(outputPath)
 
 	err = drawer.DrawTimetable(timetable.Entries, outputPath)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to generate timetable image")
+		return
+	}
+
+	w.Header().Set("Content-Type", "image/png")
+	http.ServeFile(w, r, outputPath)
+}
+
+type SubjectFilter struct {
+	Code  string `json:"code"`
+	Alias string `json:"alias,omitempty"`
+}
+
+type FormattedTimetableRequest struct {
+	Batch    string          `json:"batch"`
+	Subjects []SubjectFilter `json:"subjects"`
+}
+
+func (h *Handler) GetFormattedTimetablePNG(w http.ResponseWriter, r *http.Request) {
+	var req FormattedTimetableRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	if req.Batch == "" || len(req.Subjects) == 0 {
+		writeError(w, http.StatusBadRequest, "batch and subjects are required")
+		return
+	}
+
+	batchID := types.BatchID(req.Batch)
+	timetable, ok := h.registry.GetTimetable(batchID)
+	if !ok {
+		writeError(w, http.StatusNotFound, "timetable not found")
+		return
+	}
+
+	// Build lookup: SubjectCode -> alias (empty string if no alias)
+	subjectSet := make(map[types.SubjectCode]string, len(req.Subjects))
+	for _, s := range req.Subjects {
+		subjectSet[types.SubjectCode(s.Code)] = s.Alias
+	}
+
+	// Filter entries to only include requested subjects
+	var filtered []model.TimetableEntry
+	for _, entry := range timetable.Entries {
+		if _, ok := subjectSet[entry.ClassInfo.SubjectCode]; ok {
+			filtered = append(filtered, entry)
+		}
+	}
+
+	drawer, err := image.NewTimetableDrawer()
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to create timetable drawer")
+		return
+	}
+
+	tmpFile, err := os.CreateTemp("", fmt.Sprintf("formatted_%s_*.png", req.Batch))
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to create temp file")
+		return
+	}
+	outputPath := tmpFile.Name()
+	tmpFile.Close()
+
+	defer os.Remove(outputPath)
+
+	err = drawer.DrawFormattedTimetable(filtered, subjectSet, outputPath)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to generate timetable image")
 		return

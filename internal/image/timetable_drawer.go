@@ -5,6 +5,7 @@ import (
 	"image/color"
 
 	"github.com/DivyeshMangla/tiet-timetable/internal/model"
+	"github.com/DivyeshMangla/tiet-timetable/internal/types"
 )
 
 type TimetableDrawer struct {
@@ -38,6 +39,41 @@ func (td *TimetableDrawer) getFillColor(classType model.ClassType) color.RGBA {
 func (td *TimetableDrawer) DrawTimetable(entries []model.TimetableEntry, outputPath string) error {
 	for _, entry := range entries {
 		text := fmt.Sprintf("%s - %s", entry.ClassInfo.SubjectCode, entry.ClassInfo.Room)
+		fillColor := td.getFillColor(entry.ClassInfo.ClassType)
+
+		if entry.ClassInfo.IsBlock {
+			err := td.filler.FillVerticalWithText(
+				entry.TimeSlot,
+				entry.Day,
+				fillColor,
+				text,
+			)
+			if err != nil {
+				return err
+			}
+		} else {
+			err := td.filler.FillCellWithText(
+				entry.TimeSlot,
+				entry.Day,
+				fillColor,
+				text,
+			)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return td.filler.Save(outputPath)
+}
+
+func (td *TimetableDrawer) DrawFormattedTimetable(entries []model.TimetableEntry, aliases map[types.SubjectCode]string, outputPath string) error {
+	for _, entry := range entries {
+		label := string(entry.ClassInfo.SubjectCode)
+		if alias, ok := aliases[entry.ClassInfo.SubjectCode]; ok && alias != "" {
+			label = alias
+		}
+		text := fmt.Sprintf("%s - %s", label, entry.ClassInfo.Room)
 		fillColor := td.getFillColor(entry.ClassInfo.ClassType)
 
 		if entry.ClassInfo.IsBlock {
