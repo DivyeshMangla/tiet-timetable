@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Download } from 'lucide-react';
 
 interface Subject {
@@ -15,6 +15,15 @@ export function TimetableView({ batch, subjects }: TimetableViewProps) {
   const [timetableImage, setTimetableImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Clean up the object URL to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (timetableImage) {
+        URL.revokeObjectURL(timetableImage);
+      }
+    };
+  }, [timetableImage]);
 
   const generateTimetable = async () => {
     if (!batch || subjects.length === 0) {
