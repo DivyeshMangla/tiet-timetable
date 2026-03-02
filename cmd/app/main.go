@@ -8,32 +8,21 @@ import (
 	"strings"
 
 	"github.com/DivyeshMangla/tiet-timetable/internal/api"
-	"github.com/DivyeshMangla/tiet-timetable/internal/config"
 	"github.com/DivyeshMangla/tiet-timetable/internal/io"
 	"github.com/DivyeshMangla/tiet-timetable/internal/parser"
 	"github.com/DivyeshMangla/tiet-timetable/internal/registry"
 	"github.com/xuri/excelize/v2"
 )
 
-const configFile = "config.yml"
+const defaultTimetableURL = "https://www.thapar.edu/upload/files/UG,%20PG%20TIME%20TABLE%20JAN%20TO%20MAY%202026.xlsx"
 
 func main() {
-	loader := config.NewConfigLoader(configFile)
-
-	handled, err := loader.HandleInitFlag(os.Args[1:])
-	if err != nil {
-		log.Fatalf("Failed to handle init flag: %v", err)
-	}
-	if handled {
-		return
+	timetableURL := os.Getenv("TIMETABLE_URL")
+	if timetableURL == "" {
+		timetableURL = defaultTimetableURL
 	}
 
-	cfg, err := loader.Load()
-	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
-	}
-
-	workbook, err := loadFromURL(cfg.TimetableURL)
+	workbook, err := loadFromURL(timetableURL)
 	if err != nil {
 		log.Fatalf("Failed to load workbook: %v", err)
 	}
