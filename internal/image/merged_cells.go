@@ -6,7 +6,6 @@ import (
 
 	"github.com/DivyeshMangla/tiet-timetable/internal/model"
 	"github.com/golang/freetype"
-	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
 )
 
@@ -44,17 +43,11 @@ func (cf *CapsuleFiller) FillVerticalWithText(ts model.TimeSlot, day model.Day, 
 	c.SetSrc(image.NewUniform(TextColor))
 	c.SetHinting(font.HintingFull)
 
-	face := truetype.NewFace(cf.font, &truetype.Options{
-		Size:    DefaultFontSize,
-		DPI:     72,
-		Hinting: font.HintingFull,
-	})
-
-	bounds, _ := font.BoundString(face, text)
+	bounds, _ := font.BoundString(cf.face, text)
 	textWidth := (bounds.Max.X - bounds.Min.X).Ceil()
 	leftBearing := bounds.Min.X.Ceil()
 
-	metrics := face.Metrics()
+	metrics := cf.face.Metrics()
 	ascent := metrics.Ascent.Ceil()
 	descent := metrics.Descent.Ceil()
 	textHeight := ascent + descent

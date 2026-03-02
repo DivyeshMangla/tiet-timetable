@@ -7,23 +7,22 @@ import (
 	"net/http"
 )
 
-func Download(url string) (io.ReadCloser, error) {
-	tr := &http.Transport{
+var httpClient = &http.Client{
+	Transport: &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{
-		Transport: tr,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return nil
-		},
-	}
+	},
+	CheckRedirect: func(req *http.Request, via []*http.Request) error {
+		return nil
+	},
+}
 
+func Download(url string) (io.ReadCloser, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	resp, err := client.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to download: %w", err)
 	}

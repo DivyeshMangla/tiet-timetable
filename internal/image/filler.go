@@ -1,6 +1,9 @@
 package image
 
 import (
+	"fmt"
+	"sync"
+
 	"github.com/DivyeshMangla/tiet-timetable/internal/model"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
@@ -17,37 +20,69 @@ const (
 	DefaultFontSize = 53.0
 )
 
+// bgTemplate holds the decoded background image, initialized once.
+var (
+	bgTemplate   *image.RGBA
+	parsedFont   *truetype.Font
+	templateOnce sync.Once
+	templateErr  error
+)
+
+func initTemplate() {
+	templateOnce.Do(func() {
+		bgFile, err := GetBackground(Background)
+		if err != nil {
+			templateErr = fmt.Errorf("failed to open background: %w", err)
+			return
+		}
+		defer bgFile.Close()
+
+		img, err := png.Decode(bgFile)
+		if err != nil {
+			templateErr = fmt.Errorf("failed to decode background: %w", err)
+			return
+		}
+
+		bgTemplate = image.NewRGBA(img.Bounds())
+		draw.Draw(bgTemplate, bgTemplate.Bounds(), img, image.Point{}, draw.Src)
+
+		fontBytes, err := GetFont(FontFile)
+		if err != nil {
+			templateErr = fmt.Errorf("failed to read font: %w", err)
+			return
+		}
+
+		parsedFont, err = truetype.Parse(fontBytes)
+		if err != nil {
+			templateErr = fmt.Errorf("failed to parse font: %w", err)
+			return
+		}
+	})
+}
+
 type CapsuleFiller struct {
 	img  *image.RGBA
 	font *truetype.Font
+	face font.Face
 }
 
 func NewCapsuleFiller() (*CapsuleFiller, error) {
-	bgFile, err := GetBackground(Background)
-	if err != nil {
-		return nil, err
-	}
-	defer bgFile.Close()
-
-	img, err := png.Decode(bgFile)
-	if err != nil {
-		return nil, err
+	initTemplate()
+	if templateErr != nil {
+		return nil, templateErr
 	}
 
-	rgba := image.NewRGBA(img.Bounds())
-	draw.Draw(rgba, rgba.Bounds(), img, image.Point{}, draw.Src)
+	// Copy the template pixels instead of re-decoding the PNG each time.
+	rgba := image.NewRGBA(bgTemplate.Bounds())
+	copy(rgba.Pix, bgTemplate.Pix)
 
-	fontBytes, err := GetFont(FontFile)
-	if err != nil {
-		return nil, err
-	}
+	face := truetype.NewFace(parsedFont, &truetype.Options{
+		Size:    DefaultFontSize,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	})
 
-	f, err := truetype.Parse(fontBytes)
-	if err != nil {
-		return nil, err
-	}
-
-	return &CapsuleFiller{img: rgba, font: f}, nil
+	return &CapsuleFiller{img: rgba, font: parsedFont, face: face}, nil
 }
 
 func (cf *CapsuleFiller) FillCell(timeSlot model.TimeSlot, day model.Day, fillColor color.RGBA) {
@@ -104,17 +139,11 @@ func (cf *CapsuleFiller) FillCellWithText(timeSlot model.TimeSlot, day model.Day
 	c.SetSrc(image.NewUniform(TextColor))
 	c.SetHinting(font.HintingFull)
 
-	face := truetype.NewFace(cf.font, &truetype.Options{
-		Size:    DefaultFontSize,
-		DPI:     72,
-		Hinting: font.HintingFull,
-	})
-
-	bounds, _ := font.BoundString(face, text)
+	bounds, _ := font.BoundString(cf.face, text)
 	textWidth := (bounds.Max.X - bounds.Min.X).Ceil()
 	leftBearing := bounds.Min.X.Ceil()
 
-	metrics := face.Metrics()
+	metrics := cf.face.Metrics()
 	ascent := metrics.Ascent.Ceil()
 	descent := metrics.Descent.Ceil()
 	textHeight := ascent + descent
