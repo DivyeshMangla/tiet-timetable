@@ -1,4 +1,4 @@
-package parser
+package excel
 
 import (
 	"github.com/DivyeshMangla/tiet-timetable/internal/parser/utils"

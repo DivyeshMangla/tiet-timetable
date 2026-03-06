@@ -1,93 +1,59 @@
 package registry
 
-import (
-	"github.com/DivyeshMangla/tiet-timetable/internal/model"
-	"github.com/DivyeshMangla/tiet-timetable/internal/types"
-)
+import "github.com/DivyeshMangla/tiet-timetable/internal/types"
 
 type TimetableRegistry struct {
-	sheetToBatches   map[types.SheetID]map[types.BatchID]struct{}
-	batchToTimetable map[types.BatchID]model.Timetable
+	batchToTimetable map[types.BatchID]*types.Timetable
 }
 
 func NewTimetableRegistry() *TimetableRegistry {
 	return &TimetableRegistry{
-		sheetToBatches:   make(map[types.SheetID]map[types.BatchID]struct{}),
-		batchToTimetable: make(map[types.BatchID]model.Timetable),
+		batchToTimetable: make(map[types.BatchID]*types.Timetable),
 	}
 }
 
-func (tr *TimetableRegistry) RegisterBatch(sheetID types.SheetID, batchID types.BatchID, timetable model.Timetable) {
-	if tr.sheetToBatches[sheetID] == nil {
-		tr.sheetToBatches[sheetID] = make(map[types.BatchID]struct{})
-	}
-	tr.sheetToBatches[sheetID][batchID] = struct{}{}
-	tr.batchToTimetable[batchID] = timetable
+func (r *TimetableRegistry) AddTimetable(batch types.BatchID, timetable *types.Timetable) {
+	r.batchToTimetable[batch] = timetable
 }
 
-func (tr *TimetableRegistry) GetTimetable(batchID types.BatchID) (model.Timetable, bool) {
-	timetable, ok := tr.batchToTimetable[batchID]
+func (r *TimetableRegistry) Get(batch types.BatchID) (*types.Timetable, bool) {
+	timetable, ok := r.batchToTimetable[batch]
 	return timetable, ok
 }
 
-func (tr *TimetableRegistry) GetBatches(sheetID types.SheetID) map[types.BatchID]struct{} {
-	return tr.sheetToBatches[sheetID]
+func (r *TimetableRegistry) TotalCount() int {
+	return len(r.batchToTimetable)
 }
 
-func (tr *TimetableRegistry) SheetIDs() []types.SheetID {
-	ids := make([]types.SheetID, 0, len(tr.sheetToBatches))
-	for id := range tr.sheetToBatches {
-		ids = append(ids, id)
+func (r *TimetableRegistry) AllTimetables() []*types.Timetable {
+	all := make([]*types.Timetable, 0, len(r.batchToTimetable))
+	for _, timetable := range r.batchToTimetable {
+		all = append(all, timetable)
 	}
-	return ids
+	return all
 }
 
-func (tr *TimetableRegistry) BatchIDs(sheetID types.SheetID) []types.BatchID {
-	batches, ok := tr.sheetToBatches[sheetID]
-	if !ok {
-		return nil
-	}
-	ids := make([]types.BatchID, 0, len(batches))
-	for id := range batches {
-		ids = append(ids, id)
-	}
-	return ids
-}
-
-func (tr *TimetableRegistry) AllBatches() []types.BatchID {
-	batches := make([]types.BatchID, 0, len(tr.batchToTimetable))
-	for batchID := range tr.batchToTimetable {
-		batches = append(batches, batchID)
+func (r *TimetableRegistry) AllBatches() []types.BatchID {
+	batches := make([]types.BatchID, 0, len(r.batchToTimetable))
+	for batch := range r.batchToTimetable {
+		batches = append(batches, batch)
 	}
 	return batches
 }
 
-func (tr *TimetableRegistry) AllSubjects() []types.SubjectCode {
+func (r *TimetableRegistry) AllUniqueSubjects() []types.SubjectCode {
 	seen := make(map[types.SubjectCode]struct{})
-	for _, timetable := range tr.batchToTimetable {
-		for _, entry := range timetable.Entries {
-			seen[entry.ClassInfo.SubjectCode] = struct{}{}
+
+	for _, timetable := range r.batchToTimetable {
+		for _, code := range timetable.AllUniqueSubjects() {
+			seen[code] = struct{}{}
 		}
 	}
-	subjects := make([]types.SubjectCode, 0, len(seen))
-	for code := range seen {
-		subjects = append(subjects, code)
-	}
-	return subjects
-}
 
-func (tr *TimetableRegistry) BatchSubjects(batchID types.BatchID) ([]types.SubjectCode, bool) {
-	timetable, ok := tr.batchToTimetable[batchID]
-	if !ok {
-		return nil, false
-	}
-	seen := make(map[types.SubjectCode]struct{})
-	for _, entry := range timetable.Entries {
-		seen[entry.ClassInfo.SubjectCode] = struct{}{}
-	}
-	subjects := make([]types.SubjectCode, 0, len(seen))
+	codes := make([]types.SubjectCode, 0, len(seen))
 	for code := range seen {
-		subjects = append(subjects, code)
+		codes = append(codes, code)
 	}
-	return subjects, true
+
+	return codes
 }

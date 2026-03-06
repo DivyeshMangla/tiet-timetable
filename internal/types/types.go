@@ -1,7 +1,6 @@
 package types
 
 type (
-	ClassType   int
 	TimeSlot    int
 	SheetID     string
 	BatchID     string
@@ -13,16 +12,8 @@ type (
 		Row int
 		Col int
 	}
-
-	Class struct {
-		SubjectCode SubjectCode
-		Room        Room
-		Teacher     Teacher
-	}
-
-	ClassSlot struct {
-		Start   TimeSlot
-		End     TimeSlot
-		Classes []Class
-	}
 )
+
+func (c ClassSlot) IsBlock() bool {
+	return c.End-c.Start >= 1
+}

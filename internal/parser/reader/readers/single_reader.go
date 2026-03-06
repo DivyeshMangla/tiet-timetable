@@ -1,7 +1,7 @@
 package readers
 
 import (
-	"github.com/DivyeshMangla/tiet-timetable/internal/parser"
+	"github.com/DivyeshMangla/tiet-timetable/internal/excel"
 	"github.com/DivyeshMangla/tiet-timetable/internal/parser/utils"
 	"github.com/DivyeshMangla/tiet-timetable/internal/types"
 )
@@ -14,7 +14,7 @@ const (
 
 type SingleClassReader struct{}
 
-func (r SingleClassReader) Read(ws *parser.Worksheet, start types.TimeSlot, row, col int) (*types.ClassSlot, bool) {
+func (r SingleClassReader) Read(ws *excel.Worksheet, start types.TimeSlot, row, col int) (*types.ClassSlot, bool) {
 	subjectValue, err := ws.Cell(row+singleSubjectRowOffset, col)
 	if err != nil {
 		return nil, false

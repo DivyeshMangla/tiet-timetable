@@ -1,15 +1,23 @@
 package readers
 
 import (
-	"github.com/DivyeshMangla/tiet-timetable/internal/parser"
+	"github.com/DivyeshMangla/tiet-timetable/internal/excel"
 	"github.com/DivyeshMangla/tiet-timetable/internal/parser/utils"
 	"github.com/DivyeshMangla/tiet-timetable/internal/types"
 )
 
-type BlockClassReader struct{}
+type LargeBlockClassReader struct{}
 
-func (r BlockClassReader) Read(ws *parser.Worksheet, start types.TimeSlot, row, col int) (*types.ClassSlot, bool) {
-	subjectValue, err := ws.Cell(row, col)
+func (r LargeBlockClassReader) Read(ws *excel.Worksheet, start types.TimeSlot, row, col int) (*types.ClassSlot, bool) {
+	region, found := ws.HorizontalMergedRegion(row, col)
+	if !found || !isWideEnough(region) {
+		return nil, false
+	}
+
+	startRow := region.StartRow
+	startCol := region.StartCol
+
+	subjectValue, err := ws.Cell(startRow, startCol)
 	if err != nil {
 		return nil, false
 	}
@@ -19,7 +27,7 @@ func (r BlockClassReader) Read(ws *parser.Worksheet, start types.TimeSlot, row, 
 		return nil, false
 	}
 
-	roomValue, err := ws.Cell(row+1, col)
+	roomValue, err := ws.Cell(startRow+1, startCol)
 	if err != nil {
 		return nil, false
 	}
@@ -29,15 +37,13 @@ func (r BlockClassReader) Read(ws *parser.Worksheet, start types.TimeSlot, row, 
 		return nil, false
 	}
 
-	// Detect continuation rows (block indicator)
-	cont1, _ := ws.Cell(row+2, col)
-	cont2, _ := ws.Cell(row+3, col)
+	cont1, _ := ws.Cell(startRow+2, startCol)
+	cont2, _ := ws.Cell(startRow+3, startCol)
 
 	if CleanCell(cont1) == "" && CleanCell(cont2) == "" {
 		return nil, false
 	}
 
-	// Prefer teacher from row+3, fallback to row+2
 	teacherValue := CleanCell(cont2)
 	if teacherValue == "" {
 		teacherValue = CleanCell(cont1)
@@ -56,7 +62,7 @@ func (r BlockClassReader) Read(ws *parser.Worksheet, start types.TimeSlot, row, 
 
 	return &types.ClassSlot{
 		Start: start,
-		End:   start + 1, // block spans two slots
+		End:   start + 1,
 		Classes: []types.Class{
 			class,
 		},

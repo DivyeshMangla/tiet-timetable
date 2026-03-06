@@ -1,7 +1,7 @@
 package readers
 
 import (
-	"github.com/DivyeshMangla/tiet-timetable/internal/parser"
+	"github.com/DivyeshMangla/tiet-timetable/internal/excel"
 	"github.com/DivyeshMangla/tiet-timetable/internal/parser/utils"
 	"github.com/DivyeshMangla/tiet-timetable/internal/types"
 	"regexp"
@@ -15,7 +15,7 @@ var subjectCodePattern = regexp.MustCompile(`^[A-Z]{3}\d{3}[LTP]$`)
 
 type LectureReader struct{}
 
-func (l LectureReader) Read(ws *parser.Worksheet, start types.TimeSlot, row, col int) (*types.ClassSlot, bool) {
+func (l LectureReader) Read(ws *excel.Worksheet, start types.TimeSlot, row, col int) (*types.ClassSlot, bool) {
 	region, found := ws.HorizontalMergedRegion(row, col)
 	if !found || !isWideEnough(region) {
 		return nil, false
