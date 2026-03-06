@@ -18,7 +18,7 @@ type LegacyParser struct {
 	file           *excelize.File
 }
 
-func NewParser(file *excelize.File) (*LegacyParser, error) {
+func NewLegacyParser(file *excelize.File) (*LegacyParser, error) {
 	cache, err := FromWorkbook(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build cache: %w", err)

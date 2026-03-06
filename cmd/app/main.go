@@ -32,7 +32,7 @@ func main() {
 
 	defer workbook.Close()
 
-	p, err := parser.NewParser(workbook)
+	p, err := parser.NewLegacyParser(workbook)
 	if err != nil {
 		log.Fatalf("Failed to create parser: %v", err)
 	}
