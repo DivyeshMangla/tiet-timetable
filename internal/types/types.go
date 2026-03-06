@@ -6,4 +6,9 @@ type (
 	SubjectCode string
 	Room        string
 	Teacher     string
+
+	CellLocation struct {
+		Row int
+		Col int
+	}
 )

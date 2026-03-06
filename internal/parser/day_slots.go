@@ -76,8 +76,6 @@ func (f *daySlotsFactory) build() []DaySlots {
 	return f.result
 }
 
-const maxRowsToScan = 300
-
 func BuildDaySlotsFromSheet(file *excelize.File, sheetName string, firstSlotRow, firstSlotCol int) ([]DaySlots, error) {
 	if file == nil || firstSlotRow < 0 || firstSlotCol < 0 {
 		return nil, nil
