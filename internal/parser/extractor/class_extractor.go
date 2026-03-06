@@ -9,12 +9,12 @@ import (
 // ClassExtractor attempts to extract class information from a cell using
 // multiple reader strategies. Readers are tried in order until one matches.
 type ClassExtractor struct {
-	readers []readers.Reader
+	readers []readers.LegacyReader
 }
 
 func NewClassExtractor() *ClassExtractor {
 	return &ClassExtractor{
-		readers: []readers.Reader{
+		readers: []readers.LegacyReader{
 			&readers.SingleClassReader{},
 			&readers.LargeClassReader{},
 			&readers.BlockClassReader{},
