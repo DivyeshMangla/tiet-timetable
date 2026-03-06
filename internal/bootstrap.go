@@ -1,10 +1,15 @@
 package internal
 
 import (
+	"fmt"
+	"github.com/DivyeshMangla/tiet-timetable/internal/api"
 	"github.com/DivyeshMangla/tiet-timetable/internal/parser"
 	"github.com/DivyeshMangla/tiet-timetable/internal/registry"
 	"github.com/DivyeshMangla/tiet-timetable/internal/types"
 	"github.com/xuri/excelize/v2"
+	"log"
+	"net/http"
+	"os"
 )
 
 func Bootstrap(file *excelize.File) error {
@@ -19,6 +24,30 @@ func Bootstrap(file *excelize.File) error {
 		for batchID := range sheetLayout.BatchCells {
 			batchRegistry.AddBatch(types.SheetID(sheet), batchID)
 		}
+	}
+
+	tableParser := parser.NewParser(file, layout)
+	timetables, err := tableParser.Parse()
+	if err != nil {
+		return err
+	}
+
+	// Make & Populate TimetableRegistry
+	tableRegistry := registry.NewTimetableRegistry()
+	for _, timetable := range timetables {
+		tableRegistry.AddTimetable(timetable.Batch, &timetable)
+	}
+
+	// API
+	router := api.SetupRoutes(tableRegistry, batchRegistry, "frontend/dist")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	fmt.Printf("Server starting on http://localhost:%s\n", port)
+	if err := http.ListenAndServe(":"+port, router); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
 	}
 
 	return nil

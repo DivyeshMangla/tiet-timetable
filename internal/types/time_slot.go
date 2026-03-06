@@ -1,5 +1,7 @@
 package types
 
+import "fmt"
+
 const (
 	T1 TimeSlot = iota
 	T2
@@ -29,4 +31,12 @@ var timeSlotTimes = []struct {
 	{"14:40", "15:30"},
 	{"15:30", "16:20"},
 	{"16:20", "17:10"},
+}
+
+func TimeSlotFromNumber(number int) (TimeSlot, error) {
+	if number < 1 || number > len(timeSlotTimes) {
+		return 0, fmt.Errorf("invalid time slot number: %d", number)
+	}
+
+	return TimeSlot(number - 1), nil
 }

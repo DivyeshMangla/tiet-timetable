@@ -1,7 +1,7 @@
 package image
 
 import (
-	"github.com/DivyeshMangla/tiet-timetable/internal/model"
+	"github.com/DivyeshMangla/tiet-timetable/internal/types"
 )
 
 type GridBounds struct {
@@ -45,7 +45,7 @@ type Cell struct {
 	Height int
 }
 
-func GetCell(timeSlot model.TimeSlot, day model.Day) Cell {
+func GetCell(timeSlot types.TimeSlot, day types.Day) Cell {
 	if int(timeSlot) >= len(ScheduleGrid.YBounds) || int(day) >= len(ScheduleGrid.XBounds) {
 		return Cell{}
 	}
@@ -61,7 +61,7 @@ func GetCell(timeSlot model.TimeSlot, day model.Day) Cell {
 	}
 }
 
-func GetMergedCell(timeSlot model.TimeSlot, day model.Day) Cell {
+func GetMergedCell(timeSlot types.TimeSlot, day types.Day) Cell {
 	yBound := ScheduleGrid.YBounds[timeSlot]
 	xBound := ScheduleGrid.XBounds[day]
 

@@ -5,15 +5,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/DivyeshMangla/tiet-timetable/internal/model"
 	"github.com/DivyeshMangla/tiet-timetable/internal/parser/utils"
 	"github.com/DivyeshMangla/tiet-timetable/internal/types"
 	"github.com/xuri/excelize/v2"
 )
 
 type DayLayout struct {
-	Day           model.Day
-	TimeSlotCells map[model.TimeSlot]types.CellLocation
+	Day           types.Day
+	TimeSlotCells map[types.TimeSlot]types.CellLocation
 }
 type SheetLayout struct {
 	Days       []DayLayout
@@ -77,8 +76,8 @@ func buildDayLayouts(file *excelize.File, sheet string) ([]DayLayout, error) {
 	}
 	firstCol := 1
 
-	result := make([]DayLayout, 0, len(weekdays))
-	slots := make(map[model.TimeSlot]types.CellLocation)
+	result := make([]DayLayout, 0, len(types.Weekdays))
+	slots := make(map[types.TimeSlot]types.CellLocation)
 
 	dayIndex := -1
 	lastSlot := -1
@@ -96,25 +95,25 @@ func buildDayLayouts(file *excelize.File, sheet string) ([]DayLayout, error) {
 		if num == 1 {
 			// Commit previous day before starting the next
 			if dayIndex >= 0 {
-				result = append(result, DayLayout{Day: weekdays[dayIndex], TimeSlotCells: slots})
+				result = append(result, DayLayout{Day: types.Weekdays[dayIndex], TimeSlotCells: slots})
 			}
 
 			dayIndex++
-			if dayIndex >= len(weekdays) {
+			if dayIndex >= len(types.Weekdays) {
 				break
 			}
 
-			slots = make(map[model.TimeSlot]types.CellLocation)
+			slots = make(map[types.TimeSlot]types.CellLocation)
 		}
 
-		if slot, err := model.FromNumber(num); err == nil {
+		if slot, err := types.TimeSlotFromNumber(num); err == nil {
 			slots[slot] = types.CellLocation{Row: row, Col: firstCol}
 		}
 	}
 
 	// Append the last day's slots
-	if dayIndex >= 0 && dayIndex < len(weekdays) {
-		result = append(result, DayLayout{Day: weekdays[dayIndex], TimeSlotCells: slots})
+	if dayIndex >= 0 && dayIndex < len(types.Weekdays) {
+		result = append(result, DayLayout{Day: types.Weekdays[dayIndex], TimeSlotCells: slots})
 	}
 
 	return result, nil

@@ -37,3 +37,17 @@ func (r *BatchRegistry) AllBatches() []types.BatchID {
 
 	return all
 }
+
+// SheetIDs returns all registered sheet IDs
+func (r *BatchRegistry) SheetIDs() []types.SheetID {
+	sheets := make([]types.SheetID, 0, len(r.sheetToBatches))
+	for sheet := range r.sheetToBatches {
+		sheets = append(sheets, sheet)
+	}
+	return sheets
+}
+
+// BatchesBySheet returns all batches for a given sheet
+func (r *BatchRegistry) BatchesBySheet(sheet types.SheetID) []types.BatchID {
+	return r.sheetToBatches[sheet]
+}

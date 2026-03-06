@@ -1,10 +1,8 @@
 package image
 
 import (
-	"fmt"
 	"image/color"
 
-	"github.com/DivyeshMangla/tiet-timetable/internal/model"
 	"github.com/DivyeshMangla/tiet-timetable/internal/types"
 )
 
@@ -23,78 +21,44 @@ func NewTimetableDrawer() (*TimetableDrawer, error) {
 	}, nil
 }
 
-func (td *TimetableDrawer) getFillColor(classType model.ClassType) color.RGBA {
+func (td *TimetableDrawer) getFillColor(classType types.ClassType) color.RGBA {
 	switch classType {
-	case model.LECTURE:
+	case types.LECTURE:
 		return LectureColor
-	case model.TUTORIAL:
+	case types.TUTORIAL:
 		return TutorialColor
-	case model.PRACTICAL:
+	case types.PRACTICAL:
 		return PracticalColor
 	default:
 		return CellColor
 	}
 }
 
-func (td *TimetableDrawer) DrawTimetable(entries []model.TimetableEntry, outputPath string) error {
-	for _, entry := range entries {
-		text := fmt.Sprintf("%s - %s", entry.ClassInfo.SubjectCode, entry.ClassInfo.Room)
-		fillColor := td.getFillColor(entry.ClassInfo.ClassType)
+func (td *TimetableDrawer) DrawTimetable(timetable *types.RenderableTimetable, outputPath string) error {
+	for day, infos := range timetable.Days {
+		for _, renderInfo := range infos {
+			fillColor := td.getFillColor(renderInfo.ClassType)
 
-		if entry.ClassInfo.IsBlock {
-			err := td.filler.FillVerticalWithText(
-				entry.TimeSlot,
-				entry.Day,
-				fillColor,
-				text,
-			)
-			if err != nil {
-				return err
-			}
-		} else {
-			err := td.filler.FillCellWithText(
-				entry.TimeSlot,
-				entry.Day,
-				fillColor,
-				text,
-			)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return td.filler.Save(outputPath)
-}
-
-func (td *TimetableDrawer) DrawFormattedTimetable(entries []model.TimetableEntry, aliases map[types.SubjectCode]string, outputPath string) error {
-	for _, entry := range entries {
-		label := string(entry.ClassInfo.SubjectCode)
-		if alias, ok := aliases[entry.ClassInfo.SubjectCode]; ok && alias != "" {
-			label = alias
-		}
-		text := fmt.Sprintf("%s - %s", label, entry.ClassInfo.Room)
-		fillColor := td.getFillColor(entry.ClassInfo.ClassType)
-
-		if entry.ClassInfo.IsBlock {
-			err := td.filler.FillVerticalWithText(
-				entry.TimeSlot,
-				entry.Day,
-				fillColor,
-				text,
-			)
-			if err != nil {
-				return err
-			}
-		} else {
-			err := td.filler.FillCellWithText(
-				entry.TimeSlot,
-				entry.Day,
-				fillColor,
-				text,
-			)
-			if err != nil {
-				return err
+			if renderInfo.IsBlock() {
+				err := td.filler.FillVerticalWithText(
+					renderInfo.Start,
+					day,
+					fillColor,
+					renderInfo.Text,
+				)
+				if err != nil {
+					return err
+				}
+			} else {
+				err := td.filler.FillCellWithText(
+					renderInfo.Start,
+					day,
+					fillColor,
+					renderInfo.Text,
+				)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
