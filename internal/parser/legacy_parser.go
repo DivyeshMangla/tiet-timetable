@@ -11,26 +11,27 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-type Parser struct {
+// deprecated: LegacyParser is the original implementation of the timetable parser.
+type LegacyParser struct {
 	cache          *Cache
 	classExtractor *extractor.ClassExtractor
 	file           *excelize.File
 }
 
-func NewParser(file *excelize.File) (*Parser, error) {
+func NewParser(file *excelize.File) (*LegacyParser, error) {
 	cache, err := FromWorkbook(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build cache: %w", err)
 	}
 
-	return &Parser{
+	return &LegacyParser{
 		cache:          cache,
 		classExtractor: extractor.NewClassExtractor(),
 		file:           file,
 	}, nil
 }
 
-func (p *Parser) GetSheetByName(sheetName string) (types.SheetID, bool) {
+func (p *LegacyParser) GetSheetByName(sheetName string) (types.SheetID, bool) {
 	normalized := normalizeWhitespace(sheetName)
 	for sheetID := range p.cache.batches {
 		if normalizeWhitespace(string(sheetID)) == normalized {
@@ -40,7 +41,7 @@ func (p *Parser) GetSheetByName(sheetName string) (types.SheetID, bool) {
 	return "", false
 }
 
-func (p *Parser) SheetNames() []string {
+func (p *LegacyParser) SheetNames() []string {
 	names := make([]string, 0, len(p.cache.batches))
 	for sheetID := range p.cache.batches {
 		names = append(names, string(sheetID))
@@ -48,7 +49,7 @@ func (p *Parser) SheetNames() []string {
 	return names
 }
 
-func (p *Parser) BatchNames(sheetName string) []types.BatchID {
+func (p *LegacyParser) BatchNames(sheetName string) []types.BatchID {
 	sheetID, ok := p.GetSheetByName(sheetName)
 	if !ok {
 		return nil
@@ -66,7 +67,7 @@ func (p *Parser) BatchNames(sheetName string) []types.BatchID {
 	return ids
 }
 
-func (p *Parser) GetTimetable(sheetName, batchName string) (model.Timetable, error) {
+func (p *LegacyParser) GetTimetable(sheetName, batchName string) (model.Timetable, error) {
 	sheetID, ok := p.GetSheetByName(sheetName)
 	if !ok {
 		return model.Timetable{}, fmt.Errorf("sheet not found: %s", sheetName)
@@ -91,13 +92,13 @@ func (p *Parser) GetTimetable(sheetName, batchName string) (model.Timetable, err
 	return model.NewTimetable(entries), nil
 }
 
-func (p *Parser) processDay(sheetName string, batchCol int, daySlots DaySlots, entries *[]model.TimetableEntry) {
+func (p *LegacyParser) processDay(sheetName string, batchCol int, daySlots DaySlots, entries *[]model.TimetableEntry) {
 	for timeSlot, loc := range daySlots.Slots {
 		p.processTimeSlot(sheetName, batchCol, daySlots, timeSlot, loc.Row, entries)
 	}
 }
 
-func (p *Parser) processTimeSlot(
+func (p *LegacyParser) processTimeSlot(
 	sheetName string,
 	batchCol int,
 	daySlots DaySlots,
@@ -123,7 +124,7 @@ func (p *Parser) processTimeSlot(
 // processBlockClass expands a block class across multiple time slots.
 // A block class spans multiple consecutive time slots (indicated by a vertical merge).
 // This function creates an entry for each time slot within the merged region.
-func (p *Parser) processBlockClass(
+func (p *LegacyParser) processBlockClass(
 	region utils.MergedRegion,
 	currentRow int,
 	daySlots DaySlots,

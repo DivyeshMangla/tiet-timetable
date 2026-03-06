@@ -7,7 +7,7 @@ import (
 	"github.com/DivyeshMangla/tiet-timetable/internal/parser"
 )
 
-func PopulateFromParser(reg *TimetableRegistry, p *parser.Parser) error {
+func PopulateFromParser(reg *TimetableRegistry, p *parser.LegacyParser) error {
 	sheetNames := p.SheetNames()
 	totalBatches := 0
 
