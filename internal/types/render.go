@@ -15,5 +15,5 @@ type (
 )
 
 func (ri RenderInfo) IsBlock() bool {
-	return ri.End-ri.Start > 1
+	return ri.End-ri.Start >= 1
 }
