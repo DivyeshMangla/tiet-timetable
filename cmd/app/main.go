@@ -14,6 +14,7 @@ import (
 const defaultTimetableURL = "https://www.thapar.edu/upload/files/UG,%20PG%20TIME%20TABLE%20JAN%20TO%20MAY%202026.xlsx"
 
 func main() {
+	println("Starting timetable server...")
 	timetableURL := os.Getenv("TIMETABLE_URL")
 	if timetableURL == "" {
 		timetableURL = defaultTimetableURL
@@ -27,7 +28,6 @@ func main() {
 		log.Fatalf("Failed to trim sheet names: %v", err)
 	}
 
-	defer workbook.Close()
 	if err := internal.Bootstrap(workbook); err != nil {
 		log.Fatalf("Bootstrap failed: %v", err)
 	}

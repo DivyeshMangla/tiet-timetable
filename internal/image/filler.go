@@ -3,6 +3,7 @@ package image
 import (
 	"fmt"
 	"github.com/DivyeshMangla/tiet-timetable/internal/types"
+	"io"
 	"sync"
 
 	"github.com/golang/freetype"
@@ -171,4 +172,8 @@ func (cf *CapsuleFiller) Save(outputPath string) error {
 
 	defer file.Close()
 	return png.Encode(file, cf.img)
+}
+
+func (cf *CapsuleFiller) WriteTo(w io.Writer) error {
+	return png.Encode(w, cf.img)
 }

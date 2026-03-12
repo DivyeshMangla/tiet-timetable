@@ -2,10 +2,10 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/DivyeshMangla/tiet-timetable/internal/image"
 	"net/http"
-	"os"
+	"runtime"
+	"runtime/debug"
 
 	"github.com/DivyeshMangla/tiet-timetable/internal/registry"
 	"github.com/DivyeshMangla/tiet-timetable/internal/types"
@@ -137,24 +137,16 @@ func (h *Handler) GetFormattedTimetablePNG(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	tmpFile, err := os.CreateTemp("", fmt.Sprintf("formatted_%s_*.png", req.Batch))
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to create temp file")
-		return
-	}
-	outputPath := tmpFile.Name()
-	tmpFile.Close()
-
-	defer os.Remove(outputPath)
-
-	err = drawer.DrawTimetable(BuildRenderableTimetable(timetable, req.Subjects), outputPath)
+	w.Header().Set("Content-Type", "image/png")
+	err = drawer.WriteTimetable(BuildRenderableTimetable(timetable, req.Subjects), w)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to generate timetable image")
 		return
 	}
 
-	w.Header().Set("Content-Type", "image/png")
-	http.ServeFile(w, r, outputPath)
+	drawer = nil
+	runtime.GC()
+	debug.FreeOSMemory()
 }
 
 func writeJSON(w http.ResponseWriter, status int, data interface{}) {

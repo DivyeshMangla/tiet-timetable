@@ -10,6 +10,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime"
+	"runtime/debug"
 )
 
 func Bootstrap(file *excelize.File) error {
@@ -37,6 +39,11 @@ func Bootstrap(file *excelize.File) error {
 	for _, timetable := range timetables {
 		tableRegistry.AddTimetable(timetable.Batch, &timetable)
 	}
+
+	// Release workbook — no longer needed after parsing
+	file.Close()
+	runtime.GC()
+	debug.FreeOSMemory()
 
 	// API
 	router := api.SetupRoutes(tableRegistry, batchRegistry, "frontend/dist")

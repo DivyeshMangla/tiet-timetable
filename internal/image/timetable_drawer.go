@@ -2,6 +2,7 @@ package image
 
 import (
 	"image/color"
+	"io"
 
 	"github.com/DivyeshMangla/tiet-timetable/internal/types"
 )
@@ -34,7 +35,7 @@ func (td *TimetableDrawer) getFillColor(classType types.ClassType) color.RGBA {
 	}
 }
 
-func (td *TimetableDrawer) DrawTimetable(timetable *types.RenderableTimetable, outputPath string) error {
+func (td *TimetableDrawer) drawCells(timetable *types.RenderableTimetable) error {
 	for day, infos := range timetable.Days {
 		for _, renderInfo := range infos {
 			fillColor := td.getFillColor(renderInfo.ClassType)
@@ -62,6 +63,19 @@ func (td *TimetableDrawer) DrawTimetable(timetable *types.RenderableTimetable, o
 			}
 		}
 	}
+	return nil
+}
 
+func (td *TimetableDrawer) DrawTimetable(timetable *types.RenderableTimetable, outputPath string) error {
+	if err := td.drawCells(timetable); err != nil {
+		return err
+	}
 	return td.filler.Save(outputPath)
+}
+
+func (td *TimetableDrawer) WriteTimetable(timetable *types.RenderableTimetable, w io.Writer) error {
+	if err := td.drawCells(timetable); err != nil {
+		return err
+	}
+	return td.filler.WriteTo(w)
 }
