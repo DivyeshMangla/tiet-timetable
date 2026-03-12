@@ -1,15 +1,15 @@
 package image
 
 import (
+	"github.com/DivyeshMangla/tiet-timetable/internal/types"
 	"image"
 	"image/color"
 
-	"github.com/DivyeshMangla/tiet-timetable/internal/model"
 	"github.com/golang/freetype"
 	"golang.org/x/image/font"
 )
 
-func (cf *CapsuleFiller) FillVertical(ts model.TimeSlot, day model.Day, fillColor color.RGBA) {
+func (cf *CapsuleFiller) FillVertical(ts types.TimeSlot, day types.Day, fillColor color.RGBA) {
 	xStart := ScheduleGrid.XBounds[day].Start
 	xEnd := ScheduleGrid.XBounds[day].End
 
@@ -29,7 +29,7 @@ func (cf *CapsuleFiller) FillVertical(ts model.TimeSlot, day model.Day, fillColo
 	}
 }
 
-func (cf *CapsuleFiller) FillVerticalWithText(ts model.TimeSlot, day model.Day, fillColor color.RGBA, text string) error {
+func (cf *CapsuleFiller) FillVerticalWithText(ts types.TimeSlot, day types.Day, fillColor color.RGBA, text string) error {
 	cf.FillVertical(ts, day, fillColor)
 
 	cell := GetMergedCell(ts, day)

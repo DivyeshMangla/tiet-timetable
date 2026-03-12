@@ -1,4 +1,4 @@
-package model
+package types
 
 type Day int
 
@@ -9,6 +9,10 @@ const (
 	THU
 	FRI
 )
+
+var Weekdays = []Day{
+	MON, TUE, WED, THU, FRI,
+}
 
 func (d Day) String() string {
 	switch d {

@@ -9,8 +9,8 @@ import (
 	"github.com/DivyeshMangla/tiet-timetable/internal/registry"
 )
 
-func SetupRoutes(reg *registry.TimetableRegistry, distDir string) http.Handler {
-	handler := NewHandler(reg)
+func SetupRoutes(timetableReg *registry.TimetableRegistry, batchReg *registry.BatchRegistry, distDir string) http.Handler {
+	handler := NewHandler(timetableReg, batchReg)
 
 	mux := http.NewServeMux()
 
@@ -20,7 +20,7 @@ func SetupRoutes(reg *registry.TimetableRegistry, distDir string) http.Handler {
 	mux.HandleFunc("GET /api/timetable/batches/{batchName}/subjects", handler.GetBatchSubjects)
 	mux.HandleFunc("GET /api/timetable/sheets/{sheetName}/batches", handler.GetBatches)
 	mux.HandleFunc("GET /api/timetable/sheets/{sheetName}/batches/{batchName}", handler.GetTimetable)
-	mux.HandleFunc("GET /api/timetable/sheets/{sheetName}/batches/{batchName}/png", handler.GetTimetablePNG)
+	//mux.HandleFunc("GET /api/timetable/sheets/{sheetName}/batches/{batchName}/png", handler.GetTimetablePNG)
 	mux.HandleFunc("POST /api/timetable/generate", handler.GetFormattedTimetablePNG)
 
 	SetupStaticFiles(mux, distDir)

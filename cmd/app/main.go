@@ -2,21 +2,19 @@ package main
 
 import (
 	"fmt"
+	"github.com/DivyeshMangla/tiet-timetable/internal"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 
-	"github.com/DivyeshMangla/tiet-timetable/internal/api"
 	"github.com/DivyeshMangla/tiet-timetable/internal/io"
-	"github.com/DivyeshMangla/tiet-timetable/internal/parser"
-	"github.com/DivyeshMangla/tiet-timetable/internal/registry"
 	"github.com/xuri/excelize/v2"
 )
 
 const defaultTimetableURL = "https://www.thapar.edu/upload/files/UG,%20PG%20TIME%20TABLE%20JAN%20TO%20MAY%202026.xlsx"
 
 func main() {
+	println("Starting timetable server...")
 	timetableURL := os.Getenv("TIMETABLE_URL")
 	if timetableURL == "" {
 		timetableURL = defaultTimetableURL
@@ -30,29 +28,8 @@ func main() {
 		log.Fatalf("Failed to trim sheet names: %v", err)
 	}
 
-	defer workbook.Close()
-
-	p, err := parser.NewParser(workbook)
-	if err != nil {
-		log.Fatalf("Failed to create parser: %v", err)
-	}
-
-	fmt.Println("Populating registry...")
-	reg := registry.NewTimetableRegistry()
-	if err := registry.PopulateFromParser(reg, p); err != nil {
-		log.Fatalf("Failed to populate registry: %v", err)
-	}
-
-	router := api.SetupRoutes(reg, "frontend/dist")
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	fmt.Printf("Server starting on http://localhost:%s\n", port)
-	if err := http.ListenAndServe(":"+port, router); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
+	if err := internal.Bootstrap(workbook); err != nil {
+		log.Fatalf("Bootstrap failed: %v", err)
 	}
 }
 

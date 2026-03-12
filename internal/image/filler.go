@@ -2,9 +2,10 @@ package image
 
 import (
 	"fmt"
+	"github.com/DivyeshMangla/tiet-timetable/internal/types"
+	"io"
 	"sync"
 
-	"github.com/DivyeshMangla/tiet-timetable/internal/model"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
@@ -85,7 +86,7 @@ func NewCapsuleFiller() (*CapsuleFiller, error) {
 	return &CapsuleFiller{img: rgba, font: parsedFont, face: face}, nil
 }
 
-func (cf *CapsuleFiller) FillCell(timeSlot model.TimeSlot, day model.Day, fillColor color.RGBA) {
+func (cf *CapsuleFiller) FillCell(timeSlot types.TimeSlot, day types.Day, fillColor color.RGBA) {
 	cell := GetCell(timeSlot, day)
 
 	for y := cell.Y; y < cell.Y+cell.Height; y++ {
@@ -125,7 +126,7 @@ func (cf *CapsuleFiller) FillCell(timeSlot model.TimeSlot, day model.Day, fillCo
 	}
 }
 
-func (cf *CapsuleFiller) FillCellWithText(timeSlot model.TimeSlot, day model.Day, fillColor color.RGBA, text string) error {
+func (cf *CapsuleFiller) FillCellWithText(timeSlot types.TimeSlot, day types.Day, fillColor color.RGBA, text string) error {
 	cf.FillCell(timeSlot, day, fillColor)
 
 	cell := GetCell(timeSlot, day)
@@ -171,4 +172,8 @@ func (cf *CapsuleFiller) Save(outputPath string) error {
 
 	defer file.Close()
 	return png.Encode(file, cf.img)
+}
+
+func (cf *CapsuleFiller) WriteTo(w io.Writer) error {
+	return png.Encode(w, cf.img)
 }
