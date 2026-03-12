@@ -13,10 +13,10 @@ type ClassReader struct {
 func NewClassExtractor() *ClassReader {
 	return &ClassReader{
 		readers: []reader.Reader{
-			SingleClassReader{},
-			LectureReader{},
 			BlockClassReader{},
 			LargeBlockClassReader{},
+			LectureReader{},
+			SingleClassReader{},
 		},
 	}
 }

@@ -44,10 +44,11 @@ func (r SingleClassReader) Read(ws *excel.Worksheet, start types.TimeSlot, row, 
 
 	room := roomMatcher.Values()[0]
 	teacher := teacherMatcher.Values()[0]
-	subject := subjectMatcher.Values()[0]
+	code, ct := parseSubjectCode(subjectMatcher.Values()[0])
 
 	class := types.Class{
-		SubjectCode: types.SubjectCode(subject),
+		SubjectCode: code,
+		ClassType:   ct,
 		Room:        types.Room(room),
 		Teacher:     types.Teacher(teacher),
 	}

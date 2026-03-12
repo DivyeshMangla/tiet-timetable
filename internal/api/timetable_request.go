@@ -48,7 +48,7 @@ func BuildRenderableTimetable(timetable *types.Timetable, subjects []Subjects) *
 				result.Days[day] = append(result.Days[day], types.RenderInfo{
 					Start:     slot.Start,
 					End:       slot.End,
-					ClassType: class.SubjectCode.ClassType(),
+					ClassType: class.ClassType,
 					Text:      text,
 				})
 			}

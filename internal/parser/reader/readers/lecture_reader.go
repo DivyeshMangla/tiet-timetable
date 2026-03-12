@@ -10,8 +10,25 @@ import (
 
 const minHorizontalMergeWidth = 3
 
-var teacherPattern = regexp.MustCompile(`^[A-Z]{2,3}(-\d)?$`)
-var subjectCodePattern = regexp.MustCompile(`^[A-Z]{3}\d{3}[LTP]$`)
+var teacherPattern = regexp.MustCompile(`^[A-Za-z0-9. -]+$`)
+var subjectCodePattern = regexp.MustCompile(`^([A-Z]{3}\d{3}|[A-Z]{5}\d)[LTP]$`)
+
+func parseSubjectCode(code string) (types.SubjectCode, types.ClassType) {
+	suffix := code[len(code)-1]
+	stripped := code[:len(code)-1]
+
+	var ct types.ClassType
+	switch suffix {
+	case 'L':
+		ct = types.LECTURE
+	case 'T':
+		ct = types.TUTORIAL
+	case 'P':
+		ct = types.PRACTICAL
+	}
+
+	return types.SubjectCode(stripped), ct
+}
 
 type LectureReader struct{}
 
@@ -60,8 +77,10 @@ func (l LectureReader) Read(ws *excel.Worksheet, start types.TimeSlot, row, col 
 	classes := make([]types.Class, n)
 
 	for i := 0; i < n; i++ {
+		code, ct := parseSubjectCode(subjects[i])
 		classes[i] = types.Class{
-			SubjectCode: types.SubjectCode(subjects[i]),
+			SubjectCode: code,
+			ClassType:   ct,
 			Room:        types.Room(rooms[i]),
 			Teacher:     types.Teacher(teachers[i]),
 		}

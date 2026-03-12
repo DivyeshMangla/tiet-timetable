@@ -3,6 +3,7 @@ package types
 type (
 	Class struct {
 		SubjectCode SubjectCode
+		ClassType   ClassType
 		Room        Room
 		Teacher     Teacher
 	}

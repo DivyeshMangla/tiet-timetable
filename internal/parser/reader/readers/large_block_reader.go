@@ -32,16 +32,27 @@ func (r LargeBlockClassReader) Read(ws *excel.Worksheet, start types.TimeSlot, r
 		return nil, false
 	}
 
-	roomMatcher := utils.NewValueMatcher(CleanCell(roomValue), nil)
-	if !roomMatcher.HasOneValue() {
+	room := CleanCell(roomValue)
+	if room == "" {
 		return nil, false
 	}
 
 	cont1, _ := ws.Cell(startRow+2, startCol)
 	cont2, _ := ws.Cell(startRow+3, startCol)
 
-	if CleanCell(cont1) == "" && CleanCell(cont2) == "" {
+	cont1Clean := CleanCell(cont1)
+	cont2Clean := CleanCell(cont2)
+
+	if cont1Clean == "" && cont2Clean == "" {
 		return nil, false
+	}
+
+	// If row+2 looks like a subject code, it's the next time slot, not a continuation
+	if cont1Clean != "" {
+		contMatcher := utils.NewValueMatcher(cont1Clean, subjectCodePattern)
+		if contMatcher.Valid() {
+			return nil, false
+		}
 	}
 
 	teacherValue := CleanCell(cont2)
@@ -49,15 +60,17 @@ func (r LargeBlockClassReader) Read(ws *excel.Worksheet, start types.TimeSlot, r
 		teacherValue = CleanCell(cont1)
 	}
 
-	teacherMatcher := utils.NewValueMatcher(teacherValue, teacherPattern)
-	if !teacherMatcher.Valid() || !teacherMatcher.HasOneValue() {
+	if teacherValue == "" {
 		return nil, false
 	}
 
+	code, ct := parseSubjectCode(subjectMatcher.Values()[0])
+
 	class := types.Class{
-		SubjectCode: types.SubjectCode(subjectMatcher.Values()[0]),
-		Room:        types.Room(roomMatcher.Values()[0]),
-		Teacher:     types.Teacher(teacherMatcher.Values()[0]),
+		SubjectCode: code,
+		ClassType:   ct,
+		Room:        types.Room(room),
+		Teacher:     types.Teacher(teacherValue),
 	}
 
 	return &types.ClassSlot{
